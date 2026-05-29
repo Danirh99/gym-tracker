@@ -1,0 +1,39 @@
+<div class="fixed inset-0 z-[80] flex items-end justify-center bg-on-surface/35 px-margin-mobile pb-md pt-xl backdrop-blur-[2px] md:items-center md:p-lg" (click)="closed.emit()">
+  <section
+    aria-labelledby="exercise-type-title"
+    aria-modal="true"
+    class="animate-page-enter box-border w-full max-w-[480px] shrink-0 overflow-hidden rounded-[28px] border border-outline-variant bg-surface-container-lowest p-md text-on-surface shadow-[0_24px_80px_rgba(19,27,46,0.28)] md:p-lg"
+    role="dialog"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="mb-md">
+      <h2 id="exercise-type-title" class="font-headline-md text-headline-md text-on-surface">Tipo de ejercicio</h2>
+      <p class="mt-xs font-body-md text-body-md text-on-surface-variant">Selecciona el tipo para abrir el formulario correcto.</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-sm">
+      @for (option of options; track option.type) {
+        <button
+          class="flex items-center gap-sm rounded-2xl border border-surface-variant bg-surface px-sm py-sm text-left transition-all hover:-translate-y-0.5 hover:bg-surface-container-low active:scale-[0.99]"
+          (click)="select(option.type)"
+          type="button"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span class="material-symbols-outlined">{{ option.icon }}</span>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block font-label-md text-label-md text-on-surface">{{ option.label }}</span>
+            <span class="mt-[2px] block font-label-sm text-label-sm text-on-surface-variant">{{ option.description }}</span>
+          </span>
+          <span class="material-symbols-outlined text-outline">chevron_right</span>
+        </button>
+      }
+    </div>
+
+    <div class="mt-md flex justify-end">
+      <button class="rounded-full bg-surface-container px-5 py-3 font-label-md text-label-md text-on-surface-variant transition-all hover:bg-surface-container-high active:scale-95" (click)="closed.emit()" type="button">
+        Cancelar
+      </button>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,57 @@
+<div class="fixed inset-0 z-[80] flex items-end justify-center bg-on-surface/35 px-margin-mobile pb-md pt-xl backdrop-blur-[2px] md:items-center md:p-lg" (click)="close()">
+  <section
+    aria-labelledby="confirm-dialog-title"
+    aria-modal="true"
+    class="animate-page-enter box-border shrink-0 overflow-hidden rounded-[28px] border border-outline-variant bg-surface-container-lowest p-md text-on-surface shadow-[0_24px_80px_rgba(19,27,46,0.28)] md:p-lg"
+    role="dialog"
+    style="width: calc(100vw - 32px); max-width: 448px;"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="mb-md flex items-start gap-sm">
+      <div
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+        [class.bg-error-container]="tone === 'danger'"
+        [class.text-on-error-container]="tone === 'danger'"
+        [class.bg-primary-container]="tone !== 'danger'"
+        [class.text-on-primary-container]="tone !== 'danger'"
+        aria-hidden="true"
+      >
+        <span class="material-symbols-outlined text-[28px]">{{ tone === 'danger' ? 'delete' : 'help' }}</span>
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <h2 id="confirm-dialog-title" class="font-headline-md text-headline-md text-on-surface">{{ title }}</h2>
+        <p class="mt-xs font-body-md text-body-md text-on-surface-variant">{{ message }}</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col-reverse gap-sm md:flex-row md:justify-end">
+      <button
+        class="rounded-full bg-surface-container px-5 py-3 font-label-md text-label-md text-on-surface-variant transition-all hover:bg-surface-container-high active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+        [disabled]="isPending"
+        (click)="close()"
+        type="button"
+      >
+        {{ cancelLabel }}
+      </button>
+
+      <button
+        class="rounded-full px-5 py-3 font-label-md text-label-md shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+        [class.bg-error]="tone === 'danger'"
+        [class.text-on-error]="tone === 'danger'"
+        [class.bg-primary-container]="tone !== 'danger'"
+        [class.text-on-primary-container]="tone !== 'danger'"
+        [disabled]="isPending"
+        (click)="confirm()"
+        type="button"
+      >
+        <span class="inline-flex items-center justify-center gap-xs">
+          @if (isPending) {
+            <span class="h-4 w-4 animate-spin-soft rounded-full border-2 border-current/25 border-t-current" aria-hidden="true"></span>
+          }
+          {{ confirmLabel }}
+        </span>
+      </button>
+    </div>
+  </section>
+</div>

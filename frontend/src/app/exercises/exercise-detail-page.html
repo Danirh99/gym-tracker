@@ -1,0 +1,166 @@
+<div class="min-h-screen bg-surface pb-32 text-on-surface">
+  <header class="sticky top-0 z-40 flex items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex items-center gap-sm">
+      <a aria-label="Volver a ejercicios" class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-surface-container-high active:scale-90" routerLink="/exercises">
+        <span class="material-symbols-outlined text-primary">arrow_back</span>
+      </a>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">Detalle de ejercicio</h1>
+    </div>
+    <div class="flex items-center gap-xs">
+      <app-theme-toggle-button />
+      <a
+        aria-label="Editar ejercicio"
+        class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-surface-container-high active:scale-95"
+        [routerLink]="progress ? ['/exercises', progress.item.id, 'edit'] : ['/exercises']"
+      >
+        <span class="material-symbols-outlined text-on-surface-variant">settings</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="space-y-md px-margin-mobile pt-sm md:mx-auto md:max-w-3xl md:px-margin-desktop">
+    @if (isLoading) {
+      <section class="space-y-sm">
+        <div class="h-8 w-2/3 animate-pulse rounded bg-surface-container-high"></div>
+        <div class="h-5 w-1/2 animate-pulse rounded bg-surface-container-high"></div>
+      </section>
+      <section class="rounded-[24px] border border-outline-variant/30 bg-surface-container-lowest p-md">
+        <div class="h-6 w-28 animate-pulse rounded bg-surface-container-high"></div>
+        <div class="mt-sm h-10 w-44 animate-pulse rounded bg-surface-container-high"></div>
+      </section>
+    } @else if (errorMessage) {
+      <section class="rounded-[24px] border border-error-container bg-error-container/60 p-md text-on-error-container">
+        <h2 class="font-headline-md text-headline-md">No se pudo cargar</h2>
+        <p class="mt-xs font-body-md text-body-md">{{ errorMessage }}</p>
+        <a class="mt-sm inline-flex rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md text-on-primary-container" routerLink="/exercises">Volver</a>
+      </section>
+    } @else if (progress) {
+      <section class="space-y-xs">
+        <h2 class="font-headline-lg text-headline-lg text-on-surface">{{ progress.item.name }}</h2>
+        <div class="flex items-center gap-xs">
+          <span class="rounded-full px-sm py-1 font-label-sm text-label-sm" [ngClass]="badgeClass(progress.item.type)">{{ progress.item.typeLabel }}</span>
+          <span class="text-sm text-on-surface-variant">· {{ progress.summary.sessions }} sesiones</span>
+        </div>
+      </section>
+
+      <section class="relative overflow-hidden rounded-[24px] border border-outline-variant/30 bg-surface-container-lowest p-md shadow-[0_8px_24px_rgba(59,130,246,0.04)]">
+        <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary-container/10 blur-2xl"></div>
+        <div class="relative z-10 flex items-center justify-between">
+          <div>
+            <p class="mb-xs font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Mejor marca</p>
+            <div class="flex items-baseline gap-xs">
+              <span class="font-headline-lg text-headline-lg text-primary">{{ progress.summary.bestTopSet ?? 'Sin registros' }}</span>
+            </div>
+            <p class="mt-xs text-sm text-on-surface-variant">{{ progress.item.typeLabel }} · {{ progress.summary.sessions | numberEs }} sesiones</p>
+          </div>
+          <div class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">workspace_premium</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-[24px] border border-outline-variant/20 bg-surface-container-low p-md shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+        <div class="mb-md flex items-center justify-between">
+          <h3 class="font-label-md text-label-md text-on-surface">Ultima vez</h3>
+          <span class="flex items-center gap-xs rounded-full bg-surface-container-highest px-sm py-1 text-xs font-bold text-on-surface-variant">
+            <span class="material-symbols-outlined text-sm">query_stats</span>
+            {{ progress.summary.lastTopSet ?? 'Sin registros' }}
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-sm md:grid-cols-4">
+          <div class="rounded-xl bg-surface-container-lowest p-sm">
+            <p class="font-label-sm text-label-sm uppercase text-outline">Sesiones</p>
+            <p class="mt-xs font-headline-md text-headline-md">{{ progress.summary.sessions | numberEs }}</p>
+          </div>
+          <div class="rounded-xl bg-surface-container-lowest p-sm">
+            <p class="font-label-sm text-label-sm uppercase text-outline">Volumen</p>
+            <p class="mt-xs font-headline-md text-headline-md">{{ progress.summary.totalVolumeKg | numberEs }} kg</p>
+          </div>
+          <div class="rounded-xl bg-surface-container-lowest p-sm">
+            <p class="font-label-sm text-label-sm uppercase text-outline">Duracion</p>
+            <p class="mt-xs font-headline-md text-headline-md">{{ progress.summary.totalDurationSeconds | duration }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-[24px] border border-outline-variant/30 bg-surface-container-lowest p-md shadow-[0_8px_24px_rgba(0,0,0,0.03)]">
+        <h3 class="mb-lg font-label-md text-label-md text-on-surface">Evolucion</h3>
+        @if (chartItems().length === 0) {
+          <div class="rounded-xl bg-surface-container-low p-md text-center text-on-surface-variant">Sin datos para graficar todavia.</div>
+        } @else {
+          <div class="relative flex h-40 w-full items-end justify-between overflow-hidden px-sm pt-8">
+            <svg class="absolute inset-0 h-full w-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+              <path [attr.d]="chartPath()" fill="none" stroke="#2dd4bf" stroke-linecap="round" stroke-width="3"></path>
+              <path [attr.d]="chartAreaPath()" fill="#2dd4bf" opacity="0.12"></path>
+              @for (entry of chartItems(); track trackByEntry($index, entry)) {
+                <circle [attr.cx]="chartPointX($index, chartItems().length)" [attr.cy]="chartPointY(entry)" fill="#2dd4bf" r="4" stroke="white" stroke-width="2"></circle>
+              }
+            </svg>
+            @for (entry of chartItems(); track trackByEntry($index, entry)) {
+              <div class="z-10 flex flex-col items-center">
+                <span class="mb-1 text-xs font-bold text-on-surface-variant">{{ chartValueLabel(entry) }}</span>
+                <span class="text-[10px] uppercase tracking-tighter text-outline">{{ entry.sessionDate | sessionDate }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="space-y-sm pb-8">
+        <h3 class="font-label-md text-label-md text-on-surface">Historial</h3>
+        @if (progress.items.length === 0) {
+          <div class="rounded-[24px] border border-dashed border-outline-variant bg-surface-container-lowest p-md text-center">
+            <p class="text-on-surface-variant">Aun no hay historial para este ejercicio.</p>
+          </div>
+        } @else {
+          @for (entry of progress.items; track trackByEntry($index, entry)) {
+            <article class="rounded-[24px] border border-outline-variant/30 bg-surface-container-lowest p-md">
+              <button class="flex w-full items-center justify-between gap-sm text-left" (click)="toggleEntry(entry)" type="button">
+                <div>
+                  <p class="font-bold text-on-surface">{{ entry.sessionDate | sessionDate }} · {{ entry.setsCount }} series</p>
+                  <p class="mt-xs text-sm text-on-surface-variant">{{ formatSetLine(entry) }}</p>
+                </div>
+                <span class="material-symbols-outlined text-on-surface-variant transition-transform" [class.rotate-180]="isExpanded(entry)">expand_more</span>
+              </button>
+
+              @if (isExpanded(entry)) {
+                <div class="mt-sm space-y-xs border-t border-outline-variant/30 pt-sm">
+                  @for (set of entry.sets; track set.setNumber) {
+                    <div class="flex items-center justify-between rounded-lg bg-surface-container-low px-sm py-2">
+                      <p class="font-label-md text-label-md text-on-surface">Serie {{ set.setNumber }}</p>
+                      <p class="font-body-md text-body-md text-on-surface-variant">
+                        @if (progress.item.type === 'cardio') {
+                          @if (set.durationSeconds !== null) {
+                            {{ set.durationSeconds | duration }}
+                          } @else {
+                            Sin datos
+                          }
+                        } @else if (progress.item.type === 'core') {
+                          @if (set.reps !== null && set.durationSeconds !== null) {
+                            {{ set.reps }} reps · {{ set.durationSeconds | duration }}
+                          } @else if (set.reps !== null) {
+                            {{ set.reps }} reps
+                          } @else if (set.durationSeconds !== null) {
+                            {{ set.durationSeconds | duration }}
+                          } @else {
+                            Sin datos
+                          }
+                        } @else if (set.weightKg !== null && set.reps !== null) {
+                          {{ set.weightKg | numberEs:1 }} kg x {{ set.reps }} reps
+                        } @else if (set.durationSeconds !== null) {
+                          {{ set.durationSeconds | duration }}
+                        } @else {
+                          Sin datos
+                        }
+                      </p>
+                    </div>
+                  }
+                </div>
+              }
+            </article>
+          }
+        }
+      </section>
+    }
+  </main>
+</div>

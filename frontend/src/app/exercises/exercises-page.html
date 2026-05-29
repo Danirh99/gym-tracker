@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-background pb-[110px] text-on-background antialiased">
+  <header class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-[32px] text-primary">fitness_center</span>
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-primary md:font-headline-lg md:text-headline-lg">
+        Ejercicios
+      </h1>
+    </div>
+
+    <div class="flex items-center gap-xs">
+      <app-theme-toggle-button />
+      <a
+        aria-label="Crear ejercicio"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-opacity hover:opacity-80 active:scale-95"
+        routerLink="/exercises/new"
+      >
+        <span class="material-symbols-outlined filled-icon">add</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="animate-page-enter mt-sm space-y-md px-margin-mobile md:px-margin-desktop">
+    <div class="relative">
+      <label class="sr-only" for="exercise-search">Buscar ejercicio</label>
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+      <input
+        id="exercise-search"
+        class="w-full rounded-xl border-2 border-outline-variant/40 bg-surface-container-low py-sm pl-12 pr-4 font-body-md text-body-md text-on-surface shadow-sm transition-colors placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container focus:outline-none"
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar ejercicio..."
+        type="search"
+      />
+    </div>
+
+    <div class="no-scrollbar -mx-margin-mobile flex gap-xs overflow-x-auto px-margin-mobile pb-2 md:mx-0 md:px-0" aria-label="Filtrar ejercicios">
+      @for (filter of filters; track filter.value) {
+        <button
+          class="whitespace-nowrap rounded-full px-4 py-2 font-label-md text-label-md transition-colors"
+          [class.bg-primary-container]="selectedFilter === filter.value"
+          [class.text-on-primary-container]="selectedFilter === filter.value"
+          [class.shadow-sm]="selectedFilter === filter.value"
+          [class.bg-surface-variant]="selectedFilter !== filter.value"
+          [class.text-on-surface-variant]="selectedFilter !== filter.value"
+          (click)="selectFilter(filter.value)"
+          type="button"
+        >
+          {{ filter.label }}
+        </button>
+      }
+    </div>
+
+    @if (isLoading) {
+      <section class="grid grid-cols-1 gap-md md:grid-cols-2 lg:grid-cols-3" aria-label="Cargando ejercicios">
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div class="flex animate-pulse items-center gap-md rounded-2xl bg-surface-container-lowest p-md shadow-[0_4px_24px_rgba(59,130,246,0.04)]">
+            <div class="h-16 w-16 shrink-0 rounded-xl bg-surface-variant"></div>
+            <div class="flex-1 space-y-3">
+              <div class="h-5 w-3/4 rounded-full bg-surface-container-highest"></div>
+              <div class="h-3 w-1/2 rounded-full bg-surface-container-highest"></div>
+              <div class="h-3 w-2/3 rounded-full bg-surface-container-highest"></div>
+            </div>
+          </div>
+        }
+      </section>
+    } @else if (errorMessage) {
+      <section class="rounded-2xl border border-error-container bg-error-container/50 p-md text-on-error-container">
+        <h2 class="font-headline-md text-headline-md">Algo ha fallado</h2>
+        <p class="mt-xs font-body-md text-body-md">{{ errorMessage }}</p>
+        <button class="mt-sm rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md text-on-primary-container" (click)="loadExercises()" type="button">
+          Reintentar
+        </button>
+      </section>
+    } @else {
+      @let visibleExercises = filteredExercises();
+
+      @if (visibleExercises.length > 0) {
+        <section class="grid grid-cols-1 gap-md md:grid-cols-2 lg:grid-cols-3" aria-label="Listado de ejercicios">
+          @for (exercise of visibleExercises; track trackByExerciseId($index, exercise)) {
+            <a
+              class="animate-list-enter group flex cursor-pointer items-center gap-md rounded-2xl bg-surface-container-lowest p-md shadow-[0_4px_24px_rgba(59,130,246,0.04)] transition-all hover:-translate-y-[2px] hover:shadow-[0_8px_32px_rgba(59,130,246,0.08)]"
+              [routerLink]="['/exercises', exercise.id]"
+              [style.animation-delay.ms]="animationDelay($index)"
+            >
+              <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-surface-variant text-primary transition-colors group-hover:bg-primary-container group-hover:text-on-primary-container">
+                <span class="material-symbols-outlined text-[32px]">{{ exercise.icon }}</span>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <h2 class="mb-xs truncate font-headline-md text-headline-md text-on-surface">{{ exercise.name }}</h2>
+                <p class="mb-1 font-label-sm text-label-sm uppercase tracking-wider text-secondary">
+                  {{ exercise.typeLabel }} · {{ muscleGroupsText(exercise) }}
+                </p>
+                <div class="flex items-center gap-2 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[16px]">history</span>
+                  <p class="font-body-md text-[14px]">
+                    @if (exercise.lastPerformance) {
+                      Último: {{ exercise.lastPerformance }}
+                    } @else {
+                      Sin registros todavía
+                    }
+                  </p>
+                </div>
+              </div>
+            </a>
+          }
+        </section>
+      } @else {
+        <section class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-md text-center shadow-[0_4px_24px_rgba(59,130,246,0.04)]">
+          <span class="material-symbols-outlined text-[40px] text-primary">search_off</span>
+          <h2 class="mt-xs font-headline-md text-headline-md text-on-surface">No hay ejercicios</h2>
+          <p class="mt-xs font-body-md text-body-md text-on-surface-variant">Prueba con otra búsqueda o cambia el filtro.</p>
+        </section>
+      }
+    }
+  </main>
+
+  @if (toastMessage) {
+    <div class="animate-toast-enter fixed bottom-[100px] left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl border border-primary-container/60 bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2">
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container" aria-hidden="true">
+        <span class="material-symbols-outlined filled-icon block text-[24px] leading-none">check</span>
+      </span>
+      <p class="flex-1 whitespace-normal font-label-md text-label-md">{{ toastMessage }}</p>
+    </div>
+  }
+
+  <app-bottom-nav></app-bottom-nav>
+</div>

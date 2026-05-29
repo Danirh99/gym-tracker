@@ -1,0 +1,43 @@
+name: Feature request
+description: Propone una mejora o nueva funcionalidad
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponer mejoras para Gym Tracker.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema que resuelve
+      description: Que necesidad o dolor estas intentando cubrir?
+      placeholder: Como usuario, me cuesta...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Que solucion propones?
+      placeholder: Podriamos anadir...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      placeholder: Tambien pense en...
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Mockups, referencias, ejemplos, etc.
+    validations:
+      required: false

@@ -1,0 +1,105 @@
+<div class="animate-page-enter flex min-h-screen flex-col bg-background text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container">
+  <header class="sticky top-0 z-10 flex w-full items-center justify-between bg-surface px-margin-mobile py-md">
+    <a
+      aria-label="Volver al listado de ejercicios"
+      class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface transition-colors hover:bg-surface-container-high"
+      routerLink="/exercises"
+    >
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Nuevo ejercicio</h1>
+    <app-theme-toggle-button />
+  </header>
+
+  <main class="mx-auto flex w-full max-w-2xl flex-grow flex-col gap-lg px-margin-mobile pb-xl pt-sm">
+    <form class="flex flex-col gap-md" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="flex flex-col gap-xs">
+        <label class="ml-1 font-label-md text-label-md text-on-surface-variant" for="exercise-name">Nombre</label>
+        <input
+          id="exercise-name"
+          class="w-full rounded-lg border-2 border-outline-variant/40 bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface shadow-sm shadow-secondary/5 outline-none transition-all duration-200 placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container"
+          [class.border-error]="showNameError()"
+          formControlName="name"
+          placeholder="Press pecho máquina"
+          type="text"
+          autocomplete="off"
+        />
+        @if (showNameError()) {
+          <p class="ml-1 font-label-sm text-label-sm text-error">
+            @if (form.controls.name.hasError('required')) {
+              El nombre es obligatorio.
+            } @else {
+              El nombre no puede superar los 120 caracteres.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-xs">
+        <span class="ml-1 font-label-md text-label-md text-on-surface-variant">Tipo</span>
+        <div class="grid grid-cols-2 gap-sm">
+          @for (option of typeOptions; track option.value) {
+            <button
+              class="rounded-full py-3 font-label-md text-label-md transition-all duration-200 hover:-translate-y-0.5"
+              [class.bg-primary-container]="form.controls.type.value === option.value"
+              [class.text-on-primary-container]="form.controls.type.value === option.value"
+              [class.shadow-sm]="form.controls.type.value === option.value"
+              [class.bg-surface-container]="form.controls.type.value !== option.value"
+              [class.text-on-surface-variant]="form.controls.type.value !== option.value"
+              (click)="selectType(option.value)"
+              type="button"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-xs">
+        <label class="ml-1 font-label-md text-label-md text-on-surface-variant" for="muscles">Músculos trabajados</label>
+        <input
+          id="muscles"
+          class="w-full rounded-lg border-2 border-outline-variant/40 bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface shadow-sm shadow-secondary/5 outline-none transition-all duration-200 placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container"
+          formControlName="muscleGroups"
+          placeholder="Pecho, tríceps, hombro"
+          type="text"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="flex flex-col gap-xs">
+        <label class="ml-1 font-label-md text-label-md text-on-surface-variant" for="notes">Notas</label>
+        <textarea
+          id="notes"
+          class="w-full resize-none rounded-lg border-2 border-outline-variant/40 bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface shadow-sm shadow-secondary/5 outline-none transition-all duration-200 placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container"
+          formControlName="notes"
+          placeholder="Máquina del fondo del gym"
+          rows="4"
+        ></textarea>
+      </div>
+
+      @if (errorMessage) {
+        <div class="rounded-lg border border-error-container bg-error-container/60 px-4 py-3 text-on-error-container">
+          <p class="font-label-md text-label-md">{{ errorMessage }}</p>
+        </div>
+      }
+
+      <div class="mt-auto pt-lg">
+        <button
+          class="w-full rounded-lg bg-primary-container py-4 font-label-md text-label-md text-on-primary shadow-[0_4px_12px_rgba(45,212,191,0.25)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_16px_rgba(45,212,191,0.35)] active:scale-95 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+          [disabled]="form.invalid || isSubmitting"
+          type="submit"
+        >
+          <span class="inline-flex items-center justify-center gap-xs">
+            @if (isSubmitting) {
+              <span class="animate-spin-soft h-4 w-4 rounded-full border-2 border-on-primary-container/25 border-t-on-primary-container" aria-hidden="true"></span>
+              Guardando...
+            } @else {
+              Guardar ejercicio
+            }
+          </span>
+        </button>
+      </div>
+    </form>
+  </main>
+</div>

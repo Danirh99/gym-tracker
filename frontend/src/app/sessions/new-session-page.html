@@ -1,0 +1,134 @@
+<div class="min-h-screen bg-background pb-[120px] pt-20 md:pb-0">
+  <header class="fixed left-0 top-0 z-40 flex w-full items-center justify-between bg-surface px-[24px] py-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+    <div class="flex items-center gap-base">
+      <a
+        aria-label="Volver al inicio"
+        class="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface-variant transition-colors hover:bg-surface-container-low active:scale-95"
+        routerLink="/"
+      >
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tight text-primary">Nuevo entrenamiento</h1>
+    </div>
+
+    <div class="flex items-center gap-xs">
+      <app-theme-toggle-button />
+      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-low text-primary">
+        <span class="material-symbols-outlined filled-icon" aria-hidden="true">fitness_center</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="animate-page-enter mx-auto flex w-full max-w-[600px] flex-col gap-[32px] px-[24px]">
+    <form class="flex flex-col gap-[32px]" [formGroup]="form" (ngSubmit)="submit()">
+      <section class="flex flex-col gap-[16px] rounded-xl border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-xs">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Datos de la sesión</h2>
+            <span class="font-body-md text-[15px] text-on-surface-variant">Fecha, nombre y contexto inicial</span>
+          </div>
+          <span class="rounded-full border border-secondary-container bg-secondary-container/30 px-3 py-1 font-label-sm text-label-sm text-on-secondary-container">Sesión</span>
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="ml-1 font-label-md text-label-md text-on-surface-variant" for="session-date">Fecha</label>
+          <div class="flex items-center rounded-lg border-2 border-transparent bg-surface-container-low px-4 py-3 shadow-sm shadow-secondary/5 transition-all duration-200 focus-within:border-primary-container focus-within:bg-surface-container-lowest">
+            <span class="material-symbols-outlined mr-3 text-on-surface-variant" aria-hidden="true">calendar_month</span>
+            <input
+              id="session-date"
+              class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none"
+              [class.text-error]="showDateError()"
+              formControlName="sessionDate"
+              type="date"
+            />
+          </div>
+          @if (showDateError()) {
+            <p class="ml-1 font-label-sm text-label-sm text-error">La fecha es obligatoria.</p>
+          }
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="ml-1 font-label-md text-label-md text-on-surface-variant" for="session-name">Nombre opcional</label>
+          <input
+            id="session-name"
+            class="w-full rounded-lg border-2 border-transparent bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface shadow-sm shadow-secondary/5 outline-none transition-all duration-200 placeholder:text-outline focus:border-primary-container focus:bg-surface-container-lowest"
+            [class.border-error]="showNameError()"
+            formControlName="name"
+            placeholder="Pecho + cardio suave"
+            type="text"
+            autocomplete="off"
+          />
+          @if (showNameError()) {
+            <p class="ml-1 font-label-sm text-label-sm text-error">El nombre no puede superar los 120 caracteres.</p>
+          }
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-[16px] rounded-xl border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-xs">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Sensación general</h2>
+            <span class="font-body-md text-[15px] text-on-surface-variant">Cómo ha ido el entrenamiento</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-base">
+          @for (option of moodOptions; track option.value) {
+            <button
+              class="flex flex-col items-center justify-center gap-xs rounded-lg border p-[16px] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+              [class.border-primary-container]="form.controls.mood.value === option.value"
+              [class.bg-primary-container]="form.controls.mood.value === option.value"
+              [class.text-on-primary-container]="form.controls.mood.value === option.value"
+              [class.shadow-sm]="form.controls.mood.value === option.value"
+              [class.border-outline-variant]="form.controls.mood.value !== option.value"
+              [class.bg-surface-container-low]="form.controls.mood.value !== option.value"
+              [class.text-on-surface-variant]="form.controls.mood.value !== option.value"
+              (click)="selectMood(option.value)"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-3xl" [class.filled-icon]="form.controls.mood.value === option.value">{{ option.icon }}</span>
+              <span class="font-label-md text-label-md">{{ option.label }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-[16px] rounded-xl border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+        <div class="flex flex-col gap-xs">
+          <h2 class="font-headline-md text-headline-md text-on-surface">Notas</h2>
+          <span class="font-body-md text-[15px] text-on-surface-variant">Ideas, molestias o pesos a mejorar</span>
+        </div>
+
+        <textarea
+          id="session-notes"
+          class="w-full resize-none rounded-lg border-2 border-transparent bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface shadow-sm shadow-secondary/5 outline-none transition-all duration-200 placeholder:text-outline focus:border-primary-container focus:bg-surface-container-lowest"
+          formControlName="notes"
+          placeholder="Intentar subir algo de peso"
+          rows="4"
+        ></textarea>
+      </section>
+
+      @if (errorMessage) {
+        <div class="rounded-xl border border-error-container bg-error-container/60 px-4 py-3 text-on-error-container shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+          <p class="font-label-md text-label-md">{{ errorMessage }}</p>
+        </div>
+      }
+
+      <button
+        class="mb-[16px] mt-[16px] flex h-[52px] w-full items-center justify-center gap-base rounded-xl bg-primary-container font-label-md text-label-md text-on-primary-container shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        [disabled]="form.invalid || isSubmitting"
+        type="submit"
+      >
+        @if (isSubmitting) {
+          <span class="animate-spin-soft h-4 w-4 rounded-full border-2 border-on-primary-container/25 border-t-on-primary-container" aria-hidden="true"></span>
+          Creando...
+        } @else {
+          <span class="material-symbols-outlined filled-icon" aria-hidden="true">add</span>
+          Crear sesión
+        }
+      </button>
+    </form>
+  </main>
+
+  <app-bottom-nav></app-bottom-nav>
+</div>

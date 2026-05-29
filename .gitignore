@@ -1,0 +1,6 @@
+.DS_Store
+frontend/node_modules/
+backend/vendor/
+backend/var/
+.env.local
+docker-compose.override.yml

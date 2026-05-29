@@ -1,0 +1,121 @@
+<div class="min-h-screen bg-background pb-[120px] text-on-background">
+  <header class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-[32px] text-primary">equalizer</span>
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-primary md:font-headline-lg md:text-headline-lg">Gráficas</h1>
+    </div>
+    <app-theme-toggle-button />
+  </header>
+
+  <main class="animate-page-enter mx-auto flex w-full max-w-3xl flex-col gap-md px-margin-mobile pt-sm md:px-margin-desktop">
+    <section class="no-scrollbar -mx-margin-mobile flex gap-xs overflow-x-auto px-margin-mobile pb-2 md:mx-0 md:px-0">
+      @for (period of periodButtons; track period.value) {
+        <button
+          class="whitespace-nowrap rounded-full px-6 py-2 font-label-md text-label-md transition-colors"
+          [ngClass]="selectedPeriod === period.value ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'"
+          (click)="selectPeriod(period.value)"
+          type="button"
+        >
+          {{ period.label }}
+        </button>
+      }
+    </section>
+
+    <section class="no-scrollbar -mx-margin-mobile flex gap-xs overflow-x-auto px-margin-mobile pb-2 md:mx-0 md:px-0">
+      @for (type of typeButtons; track type.value) {
+        <button
+          class="whitespace-nowrap rounded-full px-5 py-2 font-label-md text-label-md transition-colors"
+          [ngClass]="selectedType === type.value ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'"
+          (click)="selectType(type.value)"
+          type="button"
+        >
+          {{ type.label }}
+        </button>
+      }
+    </section>
+
+    @if (errorMessage) {
+      <section class="rounded-2xl border border-error-container bg-error-container/50 p-md text-on-error-container">
+        <h2 class="font-headline-md text-headline-md">Algo ha fallado</h2>
+        <p class="mt-xs font-body-md text-body-md">{{ errorMessage }}</p>
+      </section>
+    }
+
+    @if (isLoading) {
+      <section class="space-y-md" aria-label="Cargando graficas">
+        <div class="h-48 animate-pulse rounded-2xl bg-surface-container-low"></div>
+        <div class="h-56 animate-pulse rounded-2xl bg-surface-container-low"></div>
+      </section>
+    } @else {
+      <article class="rounded-2xl bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
+        <div class="mb-md flex items-start justify-between">
+          <div>
+            <h2 class="font-headline-md text-headline-md text-on-surface">Sesiones por semana</h2>
+            <p class="font-label-md text-label-md text-primary">{{ weeklySessionCount() }} sesiones esta semana</p>
+          </div>
+          <span class="material-symbols-outlined text-primary">event_repeat</span>
+        </div>
+
+        <div class="flex h-32 items-end justify-between gap-2">
+          @for (day of dayMetrics(); track day.label) {
+            <div class="flex flex-1 flex-col items-center gap-2">
+              <div class="relative h-24 w-full overflow-hidden rounded-full bg-primary-container/20">
+                <div class="absolute bottom-0 w-full rounded-full bg-primary-container transition-all duration-500" [style.height.%]="barHeight(day)"></div>
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">{{ day.label }}</span>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="rounded-2xl bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
+        <div class="mb-sm flex items-center justify-between gap-sm">
+          <h2 class="font-headline-md text-headline-md text-on-surface">{{ selectedTypeTitle() }}</h2>
+          <span class="rounded-full bg-secondary/10 px-3 py-1 font-label-sm text-label-sm text-secondary">{{ typeTrendPercent() }}%</span>
+        </div>
+
+        <div class="relative h-40 w-full">
+          <svg class="h-full w-full" viewBox="0 0 400 150">
+            <defs>
+              <linearGradient id="charts-gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" style="stop-color: rgba(45, 212, 191, 0.4); stop-opacity: 1"></stop>
+                <stop offset="100%" style="stop-color: rgba(45, 212, 191, 0); stop-opacity: 0"></stop>
+              </linearGradient>
+            </defs>
+            <path [attr.d]="typeAreaPath()" fill="url(#charts-gradient)"></path>
+            <path [attr.d]="typePath()" fill="none" stroke="#2DD4BF" stroke-linecap="round" stroke-width="4"></path>
+          </svg>
+          <div class="pointer-events-none absolute left-0 top-0 flex w-full justify-between px-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant opacity-60">0 {{ selectedTypeYAxisLabel() }}</span>
+            <span class="font-label-md text-label-md text-primary">{{ selectedTypeTotalLabel() }}</span>
+          </div>
+        </div>
+
+        <p class="mt-xs text-center font-body-md text-body-md text-on-surface-variant">{{ selectedTypeDescription() }}</p>
+      </article>
+
+      <div class="grid grid-cols-2 gap-sm">
+        @for (card of selectedTypeStatCards(); track card.icon + card.label) {
+          <article class="flex flex-col items-center rounded-2xl bg-surface-container-lowest p-md text-center shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
+            <div class="mb-sm flex h-12 w-12 items-center justify-center rounded-full" [ngClass]="card.tone === 'secondary' ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary'">
+              <span class="material-symbols-outlined">{{ card.icon }}</span>
+            </div>
+            <p class="font-headline-md text-headline-md text-on-surface">{{ card.value }}</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">{{ card.label }}</p>
+          </article>
+        }
+      </div>
+
+      <article class="relative overflow-hidden rounded-2xl bg-primary p-md text-on-primary">
+        <div class="relative z-10">
+          <h3 class="font-headline-md text-headline-md">Récord personal</h3>
+          <p class="mt-xs font-body-md text-body-md opacity-90">{{ recordMessage() }}</p>
+          <p class="mt-xs font-label-sm text-label-sm opacity-90">{{ periodSessionsCount() }} sesiones en el periodo</p>
+        </div>
+        <span class="material-symbols-outlined absolute -bottom-5 -right-4 text-[120px] opacity-10">workspace_premium</span>
+      </article>
+    }
+  </main>
+
+  <app-bottom-nav></app-bottom-nav>
+</div>

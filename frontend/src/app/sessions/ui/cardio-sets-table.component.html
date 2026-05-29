@@ -1,0 +1,34 @@
+<div class="overflow-x-auto rounded-2xl border border-surface-container-high bg-surface-container-lowest">
+  <table class="min-w-[760px] w-full border-collapse text-left">
+    <thead>
+      <tr class="border-b border-surface-container-high">
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Bloque</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Tiempo (min)</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Distancia (km)</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Vel. (km/h)</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Inclinacion</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Resistencia</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Kcal</th>
+        <th class="w-20 px-md py-4 text-center font-label-sm uppercase tracking-wider text-on-surface-variant">Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (set of sets; track set.setNumber) {
+        <tr class="border-b border-surface-container-low last:border-b-0">
+          <td class="px-md py-3 font-body-md font-bold text-on-surface">{{ set.setNumber }}</td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.durationMinutes" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.distanceKm" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.speedKmh" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.incline" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.resistanceLevel" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3"><input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.calories" [ngModelOptions]="{ standalone: true }" type="text" /></td>
+          <td class="px-md py-3 text-center">
+            <button class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-error-container/70 text-on-error-container transition-colors hover:bg-error-container focus-visible:bg-error-container" [attr.aria-label]="'Eliminar serie ' + set.setNumber" (click)="requestRemove($index)" type="button">
+              <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

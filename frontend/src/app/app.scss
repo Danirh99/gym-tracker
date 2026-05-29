@@ -1,0 +1,92 @@
+/* Da estilo filled a los iconos de Material usados en la app. */
+.filled-icon {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.connectivity-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.connectivity-banner.dismissing {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.connectivity-banner.offline {
+  background: #fef3c7;
+  color: #854d0e;
+}
+
+.connectivity-banner.online {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sync-strip {
+  position: sticky;
+  top: 2.25rem;
+  z-index: 1090;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.sync-strip.dismissing {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.sync-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.sync-chip.dismissing {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.sync-chip.pending {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.sync-chip.syncing {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.sync-chip.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sync-chip.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sync-link {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: none;
+}

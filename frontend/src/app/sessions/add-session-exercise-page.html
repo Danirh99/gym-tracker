@@ -1,0 +1,101 @@
+<div class="min-h-screen bg-background pb-32 text-on-background">
+  <header
+    class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex items-center gap-md">
+      @if (sessionId) {
+      <a aria-label="Volver a la sesión"
+        class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-surface-container-high active:scale-95"
+        [routerLink]="['/sessions', sessionId]">
+        <span class="material-symbols-outlined text-on-surface">arrow_back</span>
+      </a>
+      }
+      <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Añadir ejercicio</h1>
+    </div>
+    <app-theme-toggle-button />
+  </header>
+
+  <main class="mx-auto mt-md flex w-full max-w-3xl flex-col gap-md px-margin-mobile pb-8 md:px-margin-desktop">
+    @if (isLoading) {
+    <section class="rounded-2xl bg-surface-container-lowest p-md shadow-sm">
+      <div class="h-12 animate-pulse rounded-xl bg-surface-container-high"></div>
+    </section>
+    } @else if (errorMessage) {
+    <section class="rounded-2xl border border-error-container bg-error-container/60 p-md text-on-error-container">
+      {{ errorMessage }}
+    </section>
+    } @else {
+    <section class="relative">
+      <label class="sr-only" for="exercise-search">Buscar ejercicio</label>
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+      <input id="exercise-search"
+        class="w-full rounded-xl border-2 border-outline-variant/40 bg-surface-container-low py-4 pl-12 pr-4 font-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container focus:outline-none"
+        [(ngModel)]="searchTerm" placeholder="Press..." type="search" />
+    </section>
+
+    <section class="space-y-md">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Selecciona ejercicio</h2>
+      <app-exercise-selector
+        [exercises]="visibleExercises()"
+        [selectedExerciseId]="selectedExerciseId"
+        [emptyMessage]="'No hay ejercicios de fuerza que coincidan con tu búsqueda.'"
+        (exerciseSelected)="selectExercise($event)"
+      />
+    </section>
+
+    <section class="space-y-md">
+      <div class="flex items-end justify-between">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Datos del ejercicio</h2>
+        <span class="font-label-md text-primary">Histórico: {{ exerciseHistory ?? 'Sin registros' }}</span>
+      </div>
+
+      <app-strength-sets-table [sets]="sets" (removeRequested)="openRemoveSetDialog($event)" />
+    </section>
+    }
+  </main>
+
+  <div
+    class="fixed bottom-0 left-0 z-50 w-full border-t border-surface-container-high bg-surface/90 p-md backdrop-blur-lg">
+    <div class="mx-auto flex w-full max-w-3xl gap-md">
+      <button
+        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-secondary px-6 py-4 font-headline-md text-body-lg text-secondary transition-all hover:bg-secondary/5 active:scale-95"
+        (click)="addSet()" type="button">
+        <span class="material-symbols-outlined">add</span>
+        <span>Serie</span>
+      </button>
+
+      <button
+        class="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-primary-container px-6 py-4 font-headline-md text-body-lg text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+        [disabled]="!canSave() || isSaving || isLoading" (click)="save()" type="button">
+        @if (isSaving) {
+        <span
+          class="animate-spin-soft h-4 w-4 rounded-full border-2 border-on-primary-container/25 border-t-on-primary-container"
+          aria-hidden="true"></span>
+        <span>Guardando...</span>
+        } @else {
+        <span class="material-symbols-outlined filled-icon">save</span>
+        <span>Guardar</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (showDeleteDialog && setPendingDeletionIndex !== null) {
+  <app-confirm-dialog title="Eliminar serie" [message]="'Se eliminara la serie ' + (setPendingDeletionIndex + 1) + '.'"
+    confirmLabel="Eliminar" cancelLabel="Cancelar" tone="danger" (closed)="closeDeleteDialog()"
+    (confirmed)="removeSet()" />
+  }
+
+  @if (toastMessage) {
+  <div
+    class="animate-toast-enter fixed bottom-[108px] left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2"
+    [ngClass]="toastTone === 'error' ? 'border border-error/60' : 'border border-primary-container/60'">
+    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+      [ngClass]="toastTone === 'error' ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'"
+      aria-hidden="true">
+      <span class="material-symbols-outlined filled-icon block text-[24px] leading-none">{{ toastTone === 'error' ?
+        'error' : 'check' }}</span>
+    </span>
+    <p class="flex-1 whitespace-normal font-label-md text-label-md">{{ toastMessage }}</p>
+  </div>
+  }
+</div>

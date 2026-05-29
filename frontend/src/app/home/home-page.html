@@ -1,0 +1,115 @@
+<div class="min-h-screen bg-background pb-[120px] pt-20 md:pb-0">
+  <header
+    class="fixed left-0 top-0 z-40 flex w-full items-center justify-between bg-surface px-[24px] py-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+    <div class="flex items-center gap-base">
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tight text-primary">Gym Tracker</h1>
+    </div>
+
+    <app-theme-toggle-button />
+  </header>
+
+  <main class="animate-page-enter mx-auto flex w-full max-w-[600px] flex-col gap-[32px] px-[24px]">
+    <section
+      class="flex flex-col gap-[16px] rounded-xl border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Esta semana</h2>
+
+      <div class="grid grid-cols-2 gap-base">
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Sesiones</span>
+          <span class="font-headline-lg text-headline-lg text-primary">{{ weeklySessionCount() }}</span>
+        </div>
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Tiempo</span>
+          <span class="mt-auto font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{{ weeklyDurationLabel() }}</span>
+        </div>
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Ejercicios</span>
+          <span class="mt-auto font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{{ weeklyExerciseCount() }}</span>
+        </div>
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Volumen total</span>
+          <span class="mt-auto font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{{ weeklyVolumeLabel() }}</span>
+        </div>
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Racha</span>
+          <span class="mt-auto font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{{ weeklyStreakDays() }} dias</span>
+        </div>
+        <div class="flex flex-col gap-xs rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px]">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Promedio por sesion</span>
+          <span class="mt-auto font-headline-lg-mobile text-headline-lg-mobile text-on-surface">{{ weeklyAvgVolumePerSessionLabel() }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="flex flex-col gap-[16px] rounded-xl border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex flex-col gap-xs">
+          <h2 class="font-headline-md text-headline-md text-on-surface">Últimos entrenamientos</h2>
+          <span class="font-body-md text-[15px] text-on-surface-variant">Accede para añadir ejercicios y series</span>
+        </div>
+        <span
+          class="rounded-full border border-secondary-container bg-secondary-container/30 px-3 py-1 font-label-sm text-label-sm text-on-secondary-container">Recientes</span>
+      </div>
+
+      @if (isLoadingSessions) {
+      <div class="flex flex-col gap-base" aria-label="Cargando entrenamientos">
+        @for (item of [1, 2, 3]; track item) {
+        <div class="flex animate-pulse items-center gap-base border-b border-outline-variant py-[16px] last:border-b-0">
+          <div class="h-10 w-10 rounded-lg bg-surface-container-low"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-5 w-2/3 rounded-full bg-surface-container-low"></div>
+            <div class="h-3 w-1/2 rounded-full bg-surface-container-low"></div>
+          </div>
+        </div>
+        }
+      </div>
+      } @else if (sessionsErrorMessage) {
+      <div class="rounded-lg border border-error-container bg-error-container/50 p-[16px] text-on-error-container">
+        <p class="font-body-md text-body-md">{{ sessionsErrorMessage }}</p>
+        <button
+          class="mt-sm rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md text-on-primary-container"
+          (click)="loadRecentSessions()" type="button">
+          Reintentar
+        </button>
+      </div>
+      } @else if (recentSessions.length === 0) {
+      <div class="rounded-lg border border-outline-variant/50 bg-surface-container-low p-[16px] text-center">
+        <span class="material-symbols-outlined text-[32px] text-primary">event_available</span>
+        <p class="mt-xs font-body-md text-body-md text-on-surface-variant">Todavía no hay entrenamientos.</p>
+      </div>
+      } @else {
+      <div class="flex flex-col">
+        @for (session of recentSessions; track session.id) {
+        <a class="flex items-center justify-between gap-base border-b border-outline-variant py-[16px] transition-colors last:border-b-0 hover:bg-surface-container-low/60 active:scale-[0.99]"
+          [routerLink]="['/sessions', session.id]">
+          <div class="flex min-w-0 items-center gap-base">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container-low text-primary">
+              <span class="material-symbols-outlined">fitness_center</span>
+            </div>
+            <div class="min-w-0">
+              <span class="block truncate font-body-lg text-body-lg text-on-surface">{{ session.displayName }}</span>
+              <span class="block truncate font-label-md text-label-md text-on-surface-variant">{{ sessionMeta(session)
+                }}</span>
+            </div>
+          </div>
+          <div class="flex shrink-0 items-center gap-xs text-on-surface-variant">
+            <span class="font-label-md text-label-md">{{ sessionDateLabel(session) }}</span>
+            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+          </div>
+        </a>
+        }
+      </div>
+      }
+    </section>
+
+    <a class="mb-[16px] mt-[16px] flex h-[52px] w-full items-center justify-center gap-base rounded-xl bg-primary-container font-label-md text-label-md text-on-primary-container shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all hover:opacity-90 active:scale-[0.98]"
+      routerLink="/sessions/new">
+      <span class="material-symbols-outlined filled-icon">add</span>
+      Nuevo entrenamiento
+    </a>
+  </main>
+
+  <app-bottom-nav></app-bottom-nav>
+</div>

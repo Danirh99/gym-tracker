@@ -1,0 +1,6 @@
+.git
+.DS_Store
+frontend/node_modules
+backend/vendor
+backend/var
+docker-compose.override.yml

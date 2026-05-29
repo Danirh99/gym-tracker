@@ -1,0 +1,231 @@
+<div class="animate-page-enter min-h-screen bg-background pb-32 text-on-background selection:bg-primary-container">
+  <header class="sticky top-0 z-40 flex w-full flex-col gap-xs bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex w-full items-center justify-between">
+      <a aria-label="Volver al inicio" class="rounded-full p-xs transition-opacity hover:opacity-80 active:scale-95"
+        routerLink="/">
+        <span class="material-symbols-outlined text-on-surface">arrow_back</span>
+      </a>
+
+      <h1 class="max-w-[70vw] truncate font-headline-md text-[20px] font-bold leading-7 text-on-surface">
+        @if (session) {
+        {{ session.displayName }}
+        } @else {
+        Sesión
+        }
+      </h1>
+
+      <div class="flex items-center gap-xs">
+        <!-- <button aria-label="Sesión guardada"
+          class="rounded-full p-xs text-primary transition-opacity hover:opacity-80 active:scale-95" type="button">
+          <span class="material-symbols-outlined filled-icon">check_circle</span>
+        </button> -->
+        <app-theme-toggle-button />
+      </div>
+    </div>
+
+    <div class="flex justify-center">
+      <p class="font-label-md text-label-md text-outline">
+        @if (session) {
+        {{ subtitle(session) }}
+        } @else if (isLoading) {
+        Cargando sesión...
+        }
+      </p>
+    </div>
+  </header>
+
+  <main class="mx-auto flex w-full max-w-3xl flex-col gap-md px-margin-mobile pb-8 md:px-margin-desktop">
+    @if (isLoading) {
+    <section class="rounded-[24px] border border-white/50 bg-surface-container-low p-md shadow-sm">
+      <div class="h-7 w-32 animate-pulse rounded-full bg-surface-container-high"></div>
+      <div class="mt-md space-y-sm">
+        <div class="h-12 animate-pulse rounded-xl bg-surface-container-high"></div>
+        <div class="h-12 animate-pulse rounded-xl bg-surface-container-high"></div>
+      </div>
+    </section>
+    } @else if (errorMessage) {
+    <section class="rounded-[24px] border border-error-container bg-error-container/60 p-md text-on-error-container">
+      <h2 class="font-headline-md text-headline-md">No se pudo cargar</h2>
+      <p class="mt-xs font-body-md text-body-md">{{ errorMessage }}</p>
+    </section>
+    } @else if (session) {
+    <section class="rounded-[24px] border border-white/50 bg-surface-container-low p-md shadow-sm">
+      <div class="mb-sm flex items-center justify-between">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Resumen</h2>
+        <span class="material-symbols-outlined text-secondary" aria-hidden="true">insights</span>
+      </div>
+
+      <div class="space-y-sm">
+        <div class="flex items-center gap-base">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">exercise</span>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            <span class="font-bold text-on-surface">{{ session.exerciseCount }}</span> ejercicios ·
+            <span class="font-bold text-on-surface">{{ session.setCount }}</span> series
+          </p>
+        </div>
+
+        <div class="flex items-center gap-base">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
+            <span class="material-symbols-outlined text-[20px] text-secondary" aria-hidden="true">fitness_center</span>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            <span class="font-bold text-on-surface">{{ session.totalVolumeKg | numberEs }} kg</span> volumen ·
+            <span class="font-bold text-on-surface">{{ session.cardioDurationSeconds | duration }}</span> cardio
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-md h-1.5 w-full overflow-hidden rounded-full bg-outline-variant/30">
+        <div class="h-full rounded-full bg-gradient-to-r from-primary to-primary-container"
+          [class.w-2/3]="session.setCount > 0" [class.w-1/12]="session.setCount === 0"></div>
+      </div>
+
+      @if (session.notes) {
+      <p
+        class="mt-md rounded-2xl bg-surface-container-lowest/70 p-sm font-body-md text-body-md text-on-surface-variant">
+        {{ session.notes }}</p>
+      }
+    </section>
+
+    <section class="space-y-sm">
+      <div class="flex items-center justify-between px-xs">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Ejercicios</h2>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Orden: Manual</span>
+      </div>
+
+      @if (session.entries.length === 0) {
+      <div
+        class="rounded-[24px] border border-dashed border-outline-variant bg-surface-container-lowest p-md text-center shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <span class="material-symbols-outlined" aria-hidden="true">add_task</span>
+        </div>
+        <h3 class="mt-sm font-headline-md text-headline-md text-on-surface">Sesión creada</h3>
+        <p class="mt-xs font-body-md text-body-md text-on-surface-variant">Todavía no hay ejercicios registrados en este
+          entrenamiento.</p>
+      </div>
+      } @else {
+      @for (entry of session.entries; track entry.id) {
+      <article
+        class="rounded-[24px] border border-surface-variant bg-surface-container-lowest p-md shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-transform active:scale-[0.99]">
+        <div class="mb-md flex items-start justify-between">
+          <div>
+            <h3 class="font-headline-md text-[20px] font-bold leading-7 text-on-surface">{{ entry.exerciseName }}</h3>
+            <span class="mt-xs inline-flex rounded-full px-3 py-1 font-label-sm text-label-sm"
+              [ngClass]="isCardio(entry) ? 'bg-secondary/15 text-secondary' : 'bg-primary/15 text-primary'">
+              {{ entry.typeLabel }}
+            </span>
+          </div>
+          <button aria-label="Borrar ejercicio de la sesión"
+            class="rounded-full p-xs text-error transition-colors hover:bg-error-container/40 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="isDeletingEntry" (click)="openDeleteDialog(entry)" type="button">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+
+        @if (isCardio(entry)) {
+        @if (entry.sets.length > 0) {
+        @for (set of entry.sets; track set.setNumber) {
+        <div class="flex items-center justify-between rounded-xl bg-surface-container-low/30 p-sm">
+          <div class="text-center">
+            <p class="mb-xs font-label-sm text-label-sm text-outline">TIEMPO</p>
+            <p class="font-headline-md text-[20px] font-bold text-secondary">{{ set.durationSeconds ?
+              (set.durationSeconds | duration) : '-' }}</p>
+          </div>
+          <div class="h-8 w-px bg-outline-variant"></div>
+          <div class="text-center">
+            <p class="mb-xs font-label-sm text-label-sm text-outline">DISTANCIA</p>
+            <p class="font-headline-md text-[20px] font-bold text-secondary">{{ formatDistance(set.distanceMeters) }}
+              <span class="text-label-md">km</span>
+            </p>
+          </div>
+          <div class="h-8 w-px bg-outline-variant"></div>
+          <div class="text-center">
+            <p class="mb-xs font-label-sm text-label-sm text-outline">VEL.</p>
+            <p class="font-headline-md text-[20px] font-bold text-secondary">{{ formatOptionalNumber(set.speedKmh) }}
+              <span class="text-label-md">km/h</span>
+            </p>
+          </div>
+        </div>
+        }
+        } @else {
+        <p class="rounded-xl bg-surface-container-low/30 p-sm font-body-md text-body-md text-on-surface-variant">Sin
+          series registradas.</p>
+        }
+        } @else {
+        <div class="space-y-base">
+          <div class="grid grid-cols-4 items-center border-b border-surface-variant/50 py-2">
+            <span class="font-label-md text-label-md text-outline">SERIE</span>
+            <span class="text-center font-label-md text-label-md text-outline">KG</span>
+            <span class="text-center font-label-md text-label-md text-outline">REPS</span>
+            <span class="text-right font-label-md text-label-md text-outline">ESTADO</span>
+          </div>
+
+          @if (entry.sets.length === 0) {
+          <p class="py-3 font-body-md text-body-md text-on-surface-variant">Sin series registradas.</p>
+          } @else {
+          @for (set of entry.sets; track set.setNumber) {
+          <div class="grid grid-cols-4 items-center rounded-lg py-3"
+            [ngClass]="set.setNumber % 2 === 0 ? 'bg-surface-container-low/50' : ''">
+            <span class="font-body-md text-body-md font-bold text-on-surface">{{ set.setNumber }}</span>
+            <span class="text-center font-body-md text-body-md">{{ formatOptionalNumber(set.weightKg) }}</span>
+            <span class="text-center font-body-md text-body-md">{{ set.reps ?? '-' }}</span>
+            <div class="flex justify-end">
+              @if (hasSetData(set)) {
+              <span class="material-symbols-outlined filled-icon text-primary">check_circle</span>
+              } @else {
+              <span class="material-symbols-outlined text-outline-variant">radio_button_unchecked</span>
+              }
+            </div>
+          </div>
+          }
+          }
+        </div>
+        }
+      </article>
+      }
+      }
+
+      <button
+        class="flex w-full items-center justify-center gap-xs rounded-[24px] border-2 border-dashed border-outline-variant py-md font-label-md text-label-md text-outline transition-all hover:bg-surface-variant/20 active:scale-[0.98]"
+        (click)="openExerciseTypeModal()" type="button">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Añadir ejercicio
+      </button>
+    </section>
+    }
+  </main>
+
+  @if (showExerciseTypeModal) {
+  <app-exercise-type-modal (closed)="closeExerciseTypeModal()" (selected)="goToExerciseType($event)" />
+  }
+
+  @if (showDeleteDialog && entryPendingDeletion) {
+  <app-confirm-dialog title="Eliminar ejercicio"
+    [message]="'Se eliminará ' + entryPendingDeletion.exerciseName + ' de esta sesión.'" confirmLabel="Eliminar"
+    cancelLabel="Cancelar" tone="danger" [isPending]="isDeletingEntry" (closed)="closeDeleteDialog()"
+    (confirmed)="deleteEntry()" />
+  }
+
+  @if (toastMessage) {
+  <div
+    class="animate-toast-enter fixed bottom-[108px] left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2"
+    [ngClass]="toastTone === 'error' ? 'border border-error/60' : 'border border-primary-container/60'">
+    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+      [ngClass]="toastTone === 'error' ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'"
+      aria-hidden="true">
+      <span class="material-symbols-outlined filled-icon block text-[24px] leading-none">{{ toastTone === 'error' ?
+        'error' : 'check' }}</span>
+    </span>
+    <p class="flex-1 whitespace-normal font-label-md text-label-md">{{ toastMessage }}</p>
+  </div>
+  }
+
+  <!-- <div class="fixed bottom-0 left-0 z-50 flex w-full flex-col items-center gap-md bg-gradient-to-t from-background via-background/90 to-transparent px-margin-mobile pb-md pt-lg md:px-margin-desktop">
+    <button class="flex w-full max-w-3xl items-center justify-center gap-sm rounded-[24px] bg-primary-container py-4 font-headline-md text-[20px] font-bold leading-7 text-on-primary-container shadow-[0_12px_32px_rgba(45,212,191,0.3)] transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="!session" type="button">
+      Finalizar sesión
+      <span class="material-symbols-outlined" aria-hidden="true">done_all</span>
+    </button>
+  </div> -->
+</div>

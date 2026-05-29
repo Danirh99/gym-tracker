@@ -1,0 +1,35 @@
+<div class="overflow-x-auto rounded-2xl border border-surface-container-high bg-surface-container-lowest">
+  <table class="min-w-[560px] w-full border-collapse text-left">
+    <thead>
+      <tr class="border-b border-surface-container-high">
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Serie</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Peso</th>
+        <th class="px-md py-4 font-label-sm uppercase tracking-wider text-on-surface-variant">Reps</th>
+        <th class="w-20 px-md py-4 text-center font-label-sm uppercase tracking-wider text-on-surface-variant">Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (set of sets; track set.setNumber) {
+        <tr class="border-b border-surface-container-low last:border-b-0">
+          <td class="px-md py-3 font-body-md font-bold text-on-surface">{{ set.setNumber }}</td>
+          <td class="px-md py-3">
+            <input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.weightKg" [ngModelOptions]="{ standalone: true }" inputmode="decimal" placeholder="kg" type="text" />
+          </td>
+          <td class="px-md py-3">
+            <input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.reps" [ngModelOptions]="{ standalone: true }" inputmode="numeric" placeholder="reps" type="text" />
+          </td>
+          <td class="px-md py-3 text-center">
+            <button
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-error-container/70 text-on-error-container transition-colors hover:bg-error-container focus-visible:bg-error-container"
+              [attr.aria-label]="'Eliminar serie ' + set.setNumber"
+              (click)="requestRemove($index)"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
