@@ -24,7 +24,7 @@ export class ThemeService {
   }
 
   private initTheme(): void {
-    const storedTheme = localStorage.getItem(this.themeStorageKey);
+    const storedTheme = this.getStoredTheme();
 
     if (storedTheme === 'dark') {
       this.applyTheme(true);
@@ -36,7 +36,8 @@ export class ThemeService {
       return;
     }
 
-    this.applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const prefersDark = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.applyTheme(prefersDark);
   }
 
   private applyTheme(isDark: boolean): void {
@@ -55,11 +56,28 @@ export class ThemeService {
 
     if (isDark) {
       root.classList.add('dark');
-      localStorage.setItem(this.themeStorageKey, 'dark');
+      this.setStoredTheme('dark');
       return;
     }
 
     root.classList.remove('dark');
-    localStorage.setItem(this.themeStorageKey, 'light');
+    this.setStoredTheme('light');
+  }
+
+  private getStoredTheme(): 'dark' | 'light' | null {
+    if (typeof localStorage === 'undefined' || typeof localStorage.getItem !== 'function') {
+      return null;
+    }
+
+    const value = localStorage.getItem(this.themeStorageKey);
+    return value === 'dark' || value === 'light' ? value : null;
+  }
+
+  private setStoredTheme(theme: 'dark' | 'light'): void {
+    if (typeof localStorage === 'undefined' || typeof localStorage.setItem !== 'function') {
+      return;
+    }
+
+    localStorage.setItem(this.themeStorageKey, theme);
   }
 }

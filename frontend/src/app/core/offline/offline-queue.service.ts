@@ -125,8 +125,12 @@ export class OfflineQueueService {
   }
 
   async refreshPendingCount(): Promise<void> {
-    const operations = await this.getPendingOperations();
-    this.pendingCount.set(operations.length);
+    try {
+      const operations = await this.getPendingOperations();
+      this.pendingCount.set(operations.length);
+    } catch {
+      this.pendingCount.set(0);
+    }
   }
 
   private async updateOperation(id: string, updater: (operation: OfflineOperation) => OfflineOperation): Promise<void> {
@@ -143,6 +147,11 @@ export class OfflineQueueService {
     if (this.dbPromise) {
       return this.dbPromise;
     }
+
+    if (typeof indexedDB === 'undefined') {
+      throw new Error('IndexedDB no esta disponible en este entorno');
+    }
+
     this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, 2);
       request.onupgradeneeded = () => {

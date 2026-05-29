@@ -36,7 +36,16 @@ export class OfflineSyncService {
     this.isSuccessDismissing.set(false);
     this.lastSyncAt.set(new Date().toISOString());
     this.lastSyncError.set(null);
-    const queue = await this.offlineQueueService.getPendingOperations();
+    let queue: OfflineOperation[] = [];
+    try {
+      queue = await this.offlineQueueService.getPendingOperations();
+    } catch (error) {
+      this.syncInProgress = false;
+      this.isSyncing.set(false);
+      this.lastSyncResult.set('error');
+      this.lastSyncError.set(this.errorMessage(error));
+      return;
+    }
     let hadErrors = false;
     let successCount = 0;
 
