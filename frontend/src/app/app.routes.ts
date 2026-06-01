@@ -9,6 +9,8 @@ export const routes: Routes = [
   { path: 'calendar', loadComponent: () => import('./calendar/calendar-page').then((m) => m.CalendarPage) },
   // Centro de estado offline y sincronizacion.
   { path: 'offline', loadComponent: () => import('./offline/offline-center-page').then((m) => m.OfflineCenterPage) },
+  // Alertas y recomendaciones de entrenamiento.
+  { path: 'alerts', loadComponent: () => import('./alerts/alerts-page').then((m) => m.AlertsPage) },
   // Alta de sesiones.
   { path: 'sessions/new', loadComponent: () => import('./sessions/new-session-page').then((m) => m.NewSessionPage) },
   // Alta de ejercicio de fuerza dentro de una sesion.

@@ -83,6 +83,23 @@
         </div>
       </section>
 
+      <section class="rounded-[24px] border border-outline-variant/20 bg-surface-container-low p-md shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+        <div class="mb-sm flex items-center justify-between">
+          <h3 class="font-label-md text-label-md text-on-surface">Siguiente sesion</h3>
+          <span class="rounded-full px-sm py-1 text-xs font-bold" [ngClass]="recommendationClass(progress.recommendation.action)">
+            {{ recommendationLabel(progress.recommendation.action) }}
+          </span>
+        </div>
+        @if (progress.recommendation.suggestedWeightKg !== null) {
+          <p class="font-headline-md text-headline-md text-on-surface">
+            {{ progress.recommendation.suggestedWeightKg | numberEs:1 }} kg
+          </p>
+        } @else {
+          <p class="font-body-md text-body-md text-on-surface-variant">Sin peso sugerido por falta de referencia suficiente.</p>
+        }
+        <p class="mt-xs text-sm text-on-surface-variant">{{ progress.recommendation.reason }}</p>
+      </section>
+
       <section class="rounded-[24px] border border-outline-variant/30 bg-surface-container-lowest p-md shadow-[0_8px_24px_rgba(0,0,0,0.03)]">
         <h3 class="mb-lg font-label-md text-label-md text-on-surface">Evolucion</h3>
         @if (chartItems().length === 0) {

@@ -35,6 +35,17 @@ export interface ExerciseProgressSummary {
   totalDurationSeconds: number;
 }
 
+export type ExerciseRecommendationAction = 'increase' | 'maintain' | 'decrease';
+export type ExerciseRecommendationConfidence = 'low' | 'medium' | 'high';
+
+export interface ExerciseProgressRecommendation {
+  action: ExerciseRecommendationAction;
+  reason: string;
+  suggestedWeightKg: number | null;
+  deltaKg: number | null;
+  confidence: ExerciseRecommendationConfidence;
+}
+
 export interface ExerciseProgressSet {
   setNumber: number;
   weightKg: number | null;
@@ -61,4 +72,5 @@ export interface ExerciseProgressResponse {
   item: Exercise;
   summary: ExerciseProgressSummary;
   items: ExerciseProgressEntry[];
+  recommendation: ExerciseProgressRecommendation;
 }

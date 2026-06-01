@@ -1,20 +1,20 @@
 import { Component } from '@angular/core';
-import { ThemeService } from '../core/theme/theme.service';
+import { SideMenuService } from './side-menu.service';
 
 @Component({
   selector: 'app-theme-toggle-button',
   template: `
     <button
-      [attr.aria-label]="themeService.themeToggleAriaLabel()"
-      [attr.aria-pressed]="themeService.isDarkTheme"
+      aria-label="Abrir menu"
+      [attr.aria-expanded]="sideMenuService.isOpen"
       class="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high active:scale-95"
-      (click)="themeService.toggleTheme()"
+      (click)="sideMenuService.toggle()"
       type="button"
     >
-      <span class="material-symbols-outlined">{{ themeService.themeIconName() }}</span>
+      <span class="material-symbols-outlined">menu</span>
     </button>
   `,
 })
 export class ThemeToggleButtonComponent {
-  constructor(readonly themeService: ThemeService) {}
+  constructor(readonly sideMenuService: SideMenuService) {}
 }

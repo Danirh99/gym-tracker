@@ -4,10 +4,11 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { OfflineQueueService } from './core/offline/offline-queue.service';
 import { OfflineStatusService } from './core/offline/offline-status.service';
 import { OfflineSyncService } from './core/offline/offline-sync.service';
+import { SideMenuComponent } from './shared/side-menu.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, SideMenuComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

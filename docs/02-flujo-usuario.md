@@ -198,6 +198,36 @@ La app muestra gráficas simples:
 
 ---
 
+## 10.1 Consultar recomendacion automatica de carga
+
+En el detalle de cada ejercicio de fuerza, la app muestra una sugerencia para la siguiente sesion.
+
+La recomendacion se calcula automaticamente con las dos sesiones mas recientes comparables del mismo ejercicio.
+
+Posibles acciones:
+
+- Subir peso
+- Mantener peso
+- Bajar peso
+
+La tarjeta tambien muestra el motivo y, cuando aplica, un peso sugerido para la proxima sesion.
+
+---
+
+## 11. Consultar alertas
+
+El usuario puede abrir **Alertas** desde el menu lateral para detectar desajustes recientes.
+
+En el estado actual se muestran reglas con umbrales fijos:
+
+- Ejercicios sin registrar en mas de 21 dias
+- Racha en riesgo por mas de 3 dias sin entrenar
+- Desbalance de tipos en ventana de 28 dias
+
+Cada alerta incluye una accion rapida para corregirla (crear sesion, ir a ejercicios o calendario).
+
+---
+
 # Flujo resumido
 
 ```txt
@@ -216,6 +246,8 @@ Finalizar sesión
 Ver resumen
   ↓
 Consultar calendario / gráficas
+  ↓
+Consultar alertas
 ```
 
 ---
@@ -233,3 +265,4 @@ El MVP tendrá estas pantallas:
 7. Calendario
 8. Gráficas
 9. Historial de ejercicio
+10. Alertas

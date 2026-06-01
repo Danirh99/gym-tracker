@@ -7,7 +7,7 @@ import { DurationPipe } from '../shared/pipes/duration.pipe';
 import { NumberEsPipe } from '../shared/pipes/number-es.pipe';
 import { SessionDatePipe } from '../shared/pipes/session-date.pipe';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
-import { ExerciseProgressEntry, ExerciseProgressResponse, ExerciseType } from './exercise.model';
+import { ExerciseProgressEntry, ExerciseProgressResponse, ExerciseRecommendationAction, ExerciseType } from './exercise.model';
 import { ExerciseProgressDomainService } from './exercise-progress-domain.service';
 import { ExercisesFacade } from './state/exercises.facade';
 
@@ -170,5 +170,29 @@ export class ExerciseDetailPage implements OnInit {
     }
 
     return '-';
+  }
+
+  recommendationClass(action: ExerciseRecommendationAction): string {
+    if (action === 'increase') {
+      return 'bg-primary-container/40 text-on-primary-container';
+    }
+
+    if (action === 'decrease') {
+      return 'bg-error-container/70 text-on-error-container';
+    }
+
+    return 'bg-surface-container-high text-on-surface-variant';
+  }
+
+  recommendationLabel(action: ExerciseRecommendationAction): string {
+    if (action === 'increase') {
+      return 'Subir peso';
+    }
+
+    if (action === 'decrease') {
+      return 'Bajar peso';
+    }
+
+    return 'Mantener peso';
   }
 }

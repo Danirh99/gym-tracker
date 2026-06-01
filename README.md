@@ -81,6 +81,9 @@ docker compose exec frontend npm run build
 # backend
 docker compose exec backend composer install
 docker compose exec backend php bin/console doctrine:migrations:migrate
+docker compose exec backend php bin/console doctrine:fixtures:load
+# para conservar datos existentes
+docker compose exec backend php bin/console doctrine:fixtures:load --append
 docker compose exec backend php bin/console cache:clear
 
 # apagar entorno

@@ -1,0 +1,87 @@
+<div class="min-h-screen bg-background pb-[110px] text-on-background">
+  <header class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-[32px] text-primary">notifications_active</span>
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-primary md:font-headline-lg md:text-headline-lg">Alertas</h1>
+    </div>
+    <app-theme-toggle-button />
+  </header>
+
+  <main class="animate-page-enter mt-sm space-y-md px-margin-mobile md:px-margin-desktop">
+    <section class="rounded-2xl bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
+      <p class="font-label-sm text-label-sm uppercase tracking-wide text-on-surface-variant">Estado general</p>
+      <p class="mt-1 font-headline-md text-headline-md text-on-surface">{{ totalAlertCountLabel() }} alertas activas</p>
+      <p class="mt-1 font-body-md text-body-md text-on-surface-variant">Umbrales fijos: ejercicios sin uso (21 dias), racha (3 dias), desbalance (28 dias).</p>
+    </section>
+
+    @if (isLoading) {
+      <section class="space-y-sm" aria-label="Cargando alertas">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="h-28 animate-pulse rounded-2xl bg-surface-container-low"></div>
+        }
+      </section>
+    } @else if (errorMessage) {
+      <section class="rounded-2xl border border-error-container bg-error-container/50 p-md text-on-error-container">
+        <h2 class="font-headline-md text-headline-md">Algo ha fallado</h2>
+        <p class="mt-xs font-body-md text-body-md">{{ errorMessage }}</p>
+        <button class="mt-sm rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md text-on-primary-container" (click)="loadAlerts()" type="button">Reintentar</button>
+      </section>
+    } @else {
+      @if (criticalAlerts().length > 0) {
+        <section class="space-y-sm" aria-label="Alertas criticas">
+          <h2 class="font-title-lg text-title-lg text-error">Criticas</h2>
+          @for (alert of criticalAlerts(); track alert.title) {
+            <article class="rounded-2xl border border-error-container bg-error-container/30 p-md">
+              <div class="flex items-start gap-sm">
+                <span class="material-symbols-outlined text-error">{{ alert.icon }}</span>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-title-md text-title-md text-on-surface">{{ alert.title }}</h3>
+                  <p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ alert.description }}</p>
+                  <a class="mt-sm inline-flex rounded-full bg-error px-4 py-2 font-label-md text-label-md text-on-error" [routerLink]="alert.ctaLink">{{ alert.ctaLabel }}</a>
+                </div>
+              </div>
+            </article>
+          }
+        </section>
+      }
+
+      @if (warningAlerts().length > 0) {
+        <section class="space-y-sm" aria-label="Alertas de atencion">
+          <h2 class="font-title-lg text-title-lg text-primary">Atencion</h2>
+          @for (alert of warningAlerts(); track alert.title) {
+            <article class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
+              <div class="flex items-start gap-sm">
+                <span class="material-symbols-outlined text-primary">{{ alert.icon }}</span>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-title-md text-title-md text-on-surface">{{ alert.title }}</h3>
+                  <p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ alert.description }}</p>
+                  <a class="mt-sm inline-flex rounded-full bg-primary-container px-4 py-2 font-label-md text-label-md text-on-primary-container" [routerLink]="alert.ctaLink">{{ alert.ctaLabel }}</a>
+                </div>
+              </div>
+            </article>
+          }
+        </section>
+      }
+
+      @if (infoAlerts().length > 0) {
+        <section class="space-y-sm" aria-label="Informacion">
+          <h2 class="font-title-lg text-title-lg text-secondary">Info</h2>
+          @for (alert of infoAlerts(); track alert.title) {
+            <article class="rounded-2xl border border-secondary-container bg-secondary-container/30 p-md">
+              <div class="flex items-start gap-sm">
+                <span class="material-symbols-outlined text-secondary">{{ alert.icon }}</span>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-title-md text-title-md text-on-surface">{{ alert.title }}</h3>
+                  <p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ alert.description }}</p>
+                  <a class="mt-sm inline-flex rounded-full bg-secondary px-4 py-2 font-label-md text-label-md text-on-secondary" [routerLink]="alert.ctaLink">{{ alert.ctaLabel }}</a>
+                </div>
+              </div>
+            </article>
+          }
+        </section>
+      }
+    }
+  </main>
+
+  <app-bottom-nav />
+</div>

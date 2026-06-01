@@ -27,6 +27,7 @@ app/
   sessions/
   charts/
   calendar/
+  alerts/
   home/
 ```
 
@@ -86,6 +87,17 @@ Incluye:
 ### `charts/` y `calendar/`
 
 Pantallas de consulta derivadas de las sesiones registradas.
+
+### `alerts/`
+
+Pantalla de alertas operativas para detectar señales de estancamiento o desbalance.
+
+Incluye:
+
+- lectura combinada de `sessionsFacade.all()` y `exercisesFacade.list()`,
+- reglas de negocio con umbrales fijos en cliente,
+- clasificacion visual por severidad (critica, atencion, info),
+- CTA para navegar a la accion correctiva.
 
 ---
 

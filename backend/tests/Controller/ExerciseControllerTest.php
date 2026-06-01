@@ -253,6 +253,64 @@ final class ExerciseControllerTest extends TestCase
         self::assertSame('82.5 kg x 6 reps', $payload['items'][0]['topSet']);
         self::assertSame(82.5, $payload['items'][0]['topSetWeightKg']);
         self::assertSame(6, $payload['items'][0]['topSetReps']);
+        self::assertSame('maintain', $payload['recommendation']['action']);
+        self::assertSame('medium', $payload['recommendation']['confidence']);
+        self::assertSame('Mantener peso permite consolidar tecnica y repetir rendimiento.', $payload['recommendation']['reason']);
+        self::assertNull($payload['recommendation']['suggestedWeightKg']);
+    }
+
+    public function testProgressReturnsIncreaseRecommendationWhenLatestSessionsAreStableAndImproving(): void
+    {
+        $exercise = $this->exercise('Press banca', ExerciseType::Strength, ['Chest'], null);
+        $this->setId($exercise, 10);
+
+        $sessionA = new WorkoutSession(new \DateTimeImmutable('2026-05-25'));
+        $entryA = new WorkoutEntry($sessionA, $exercise, 1);
+        $entryA->addWorkoutSet((new WorkoutSet($entryA, 1))->setWeightKg(80.0)->setReps(9));
+        $entryA->addWorkoutSet((new WorkoutSet($entryA, 2))->setWeightKg(75.0)->setReps(10));
+
+        $sessionB = new WorkoutSession(new \DateTimeImmutable('2026-05-20'));
+        $entryB = new WorkoutEntry($sessionB, $exercise, 1);
+        $entryB->addWorkoutSet((new WorkoutSet($entryB, 1))->setWeightKg(80.0)->setReps(8));
+        $entryB->addWorkoutSet((new WorkoutSet($entryB, 2))->setWeightKg(75.0)->setReps(10));
+
+        $this->exerciseRepository->method('find')->with(10)->willReturn($exercise);
+        $this->mockProgressEntries([$entryA, $entryB]);
+
+        $response = $this->controller->progress(10);
+        $payload = $this->decode($response);
+
+        self::assertSame('increase', $payload['recommendation']['action']);
+        self::assertSame(82.5, $payload['recommendation']['suggestedWeightKg']);
+        self::assertSame(2.5, $payload['recommendation']['deltaKg']);
+        self::assertSame('high', $payload['recommendation']['confidence']);
+    }
+
+    public function testProgressReturnsDecreaseRecommendationWhenRepsDropAndVolumeFalls(): void
+    {
+        $exercise = $this->exercise('Press militar', ExerciseType::Strength, ['Shoulders'], null);
+        $this->setId($exercise, 11);
+
+        $sessionA = new WorkoutSession(new \DateTimeImmutable('2026-05-25'));
+        $entryA = new WorkoutEntry($sessionA, $exercise, 1);
+        $entryA->addWorkoutSet((new WorkoutSet($entryA, 1))->setWeightKg(60.0)->setReps(5));
+        $entryA->addWorkoutSet((new WorkoutSet($entryA, 2))->setWeightKg(55.0)->setReps(6));
+
+        $sessionB = new WorkoutSession(new \DateTimeImmutable('2026-05-20'));
+        $entryB = new WorkoutEntry($sessionB, $exercise, 1);
+        $entryB->addWorkoutSet((new WorkoutSet($entryB, 1))->setWeightKg(60.0)->setReps(8));
+        $entryB->addWorkoutSet((new WorkoutSet($entryB, 2))->setWeightKg(55.0)->setReps(8));
+
+        $this->exerciseRepository->method('find')->with(11)->willReturn($exercise);
+        $this->mockProgressEntries([$entryA, $entryB]);
+
+        $response = $this->controller->progress(11);
+        $payload = $this->decode($response);
+
+        self::assertSame('decrease', $payload['recommendation']['action']);
+        self::assertEquals(57.0, $payload['recommendation']['suggestedWeightKg']);
+        self::assertEquals(-3.0, $payload['recommendation']['deltaKg']);
+        self::assertSame('medium', $payload['recommendation']['confidence']);
     }
 
     public function testUpdateReturnsNotFoundWhenExerciseDoesNotExist(): void

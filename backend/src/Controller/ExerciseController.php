@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Application\Service\ExerciseProgressRecommendationService;
 use App\Entity\Exercise;
 use App\Entity\ExerciseType;
 use App\Entity\WorkoutEntry;
@@ -27,8 +28,12 @@ final class ExerciseController extends AbstractController
         private readonly ExerciseRepository $exerciseRepository,
         private readonly WorkoutEntryRepository $workoutEntryRepository,
         private readonly EntityManagerInterface $entityManager,
+        ?ExerciseProgressRecommendationService $exerciseProgressRecommendationService = null,
     ) {
+        $this->exerciseProgressRecommendationService = $exerciseProgressRecommendationService ?? new ExerciseProgressRecommendationService();
     }
+
+    private readonly ExerciseProgressRecommendationService $exerciseProgressRecommendationService;
 
     /**
      * Lista los ejercicios activos ordenados por nombre.
@@ -140,11 +145,13 @@ final class ExerciseController extends AbstractController
         );
 
         $summary = $this->buildProgressSummary($entries);
+        $recommendation = $this->exerciseProgressRecommendationService->recommend($exercise, $items);
 
         return $this->json([
             'item' => $this->serializeExerciseForProgress($exercise, $summary['lastTopSet']),
             'summary' => $summary,
             'items' => $items,
+            'recommendation' => $recommendation,
         ]);
     }
 
