@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -12,6 +12,7 @@ import { CalendarDay, CalendarDomainService } from './calendar-domain.service';
   selector: 'app-calendar-page',
   imports: [NgClass, NumberEsPipe, RouterLink, ThemeToggleButtonComponent],
   templateUrl: './calendar-page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

@@ -68,6 +68,46 @@ final class WorkoutSessionAssembler
     }
 
     /**
+     * @return array{id:int|null,name:string|null,displayName:string,sessionDate:string,mood:string|null,moodLabel:string|null,notes:string|null,startedAt:string|null,finishedAt:string|null,exerciseCount:int,setCount:int,totalVolumeKg:float,cardioDurationSeconds:int,entries:list<array{}>}
+     */
+    public function assembleSummary(WorkoutSession $session): array
+    {
+        $entries = $session->getWorkoutEntries();
+        $setCount = 0;
+        $totalVolumeKg = 0.0;
+        $cardioDurationSeconds = 0;
+
+        foreach ($entries as $entry) {
+            foreach ($entry->getWorkoutSets() as $set) {
+                ++$setCount;
+                if ($set->getWeightKg() !== null && $set->getReps() !== null) {
+                    $totalVolumeKg += $set->getWeightKg() * $set->getReps();
+                }
+                if ($set->getDurationSeconds() !== null) {
+                    $cardioDurationSeconds += $set->getDurationSeconds();
+                }
+            }
+        }
+
+        return [
+            'id' => $session->getId(),
+            'name' => $session->getName(),
+            'displayName' => $session->getName() ?? 'Entrenamiento',
+            'sessionDate' => $session->getSessionDate()->format('Y-m-d'),
+            'mood' => $session->getMood(),
+            'moodLabel' => $session->getMood() !== null ? self::MOOD_LABELS[$session->getMood()] : null,
+            'notes' => $session->getNotes(),
+            'startedAt' => $session->getStartedAt()?->format(\DateTimeInterface::ATOM),
+            'finishedAt' => $session->getFinishedAt()?->format(\DateTimeInterface::ATOM),
+            'exerciseCount' => $entries->count(),
+            'setCount' => $setCount,
+            'totalVolumeKg' => $totalVolumeKg,
+            'cardioDurationSeconds' => $cardioDurationSeconds,
+            'entries' => [],
+        ];
+    }
+
+    /**
      * @return array{id:int|null,exerciseId:int,exerciseName:string,type:string,typeLabel:string,notes:string|null,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}
      */
     private function serializeWorkoutEntry(WorkoutEntry $entry): array

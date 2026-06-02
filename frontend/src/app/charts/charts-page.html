@@ -49,13 +49,13 @@
       <div class="mb-md flex items-start justify-between">
         <div>
           <h2 class="font-headline-md text-headline-md text-on-surface">Sesiones por semana</h2>
-          <p class="font-label-md text-label-md text-primary">{{ weeklySessionCount() }} sesiones esta semana</p>
+          <p class="font-label-md text-label-md text-primary">{{ weeklySessionCountValue }} sesiones esta semana</p>
         </div>
         <span class="material-symbols-outlined text-primary">event_repeat</span>
       </div>
 
       <div class="flex h-32 items-end justify-between gap-2">
-        @for (day of dayMetrics(); track day.label) {
+        @for (day of dayMetricsValue; track day.label) {
         <div class="flex flex-1 flex-col items-center gap-2">
           <div class="relative h-24 w-full overflow-hidden rounded-full bg-primary-container/20">
             <div class="absolute bottom-0 w-full rounded-full bg-primary-container transition-all duration-500"
@@ -69,9 +69,9 @@
 
     <article class="rounded-2xl bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
       <div class="mb-sm flex items-center justify-between gap-sm">
-        <h2 class="font-headline-md text-headline-md text-on-surface">{{ selectedTypeTitle() }}</h2>
+        <h2 class="font-headline-md text-headline-md text-on-surface">{{ selectedTypeTitleValue }}</h2>
         <span class="rounded-full bg-secondary/10 px-3 py-1 font-label-sm text-label-sm text-secondary">{{
-          typeTrendPercent() }}%</span>
+          typeTrendPercentValue }}%</span>
       </div>
 
       <div class="relative h-40 w-full">
@@ -82,21 +82,21 @@
               <stop offset="100%" style="stop-color: rgba(45, 212, 191, 0); stop-opacity: 0"></stop>
             </linearGradient>
           </defs>
-          <path [attr.d]="typeAreaPath()" fill="url(#charts-gradient)"></path>
-          <path [attr.d]="typePath()" fill="none" stroke="#2DD4BF" stroke-linecap="round" stroke-width="4"></path>
+          <path [attr.d]="typeAreaPathValue" fill="url(#charts-gradient)"></path>
+          <path [attr.d]="typePathValue" fill="none" stroke="#2DD4BF" stroke-linecap="round" stroke-width="4"></path>
         </svg>
         <div class="pointer-events-none absolute left-0 top-0 flex w-full justify-between px-1">
-          <span class="font-label-sm text-label-sm text-on-surface-variant opacity-60">0 {{ selectedTypeYAxisLabel()
+          <span class="font-label-sm text-label-sm text-on-surface-variant opacity-60">0 {{ selectedTypeYAxisLabelValue
             }}</span>
-          <span class="font-label-md text-label-md text-primary">{{ selectedTypeTotalLabel() }}</span>
+          <span class="font-label-md text-label-md text-primary">{{ selectedTypeTotalLabelValue }}</span>
         </div>
       </div>
 
-      <p class="mt-xs text-center font-body-md text-body-md text-on-surface-variant">{{ selectedTypeDescription() }}</p>
+      <p class="mt-xs text-center font-body-md text-body-md text-on-surface-variant">{{ selectedTypeDescriptionValue }}</p>
     </article>
 
     <div class="grid grid-cols-2 gap-sm">
-      @for (card of selectedTypeStatCards(); track card.icon + card.label) {
+      @for (card of selectedTypeStatCardsValue; track card.icon + card.label) {
       <article
         class="flex flex-col items-center rounded-2xl bg-surface-container-lowest p-md text-center shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
         <div class="mb-sm flex h-12 w-12 items-center justify-center rounded-full"
@@ -112,8 +112,8 @@
     <article class="relative overflow-hidden rounded-2xl bg-primary-container p-md text-on-primary-container">
       <div class="relative z-10">
         <h3 class="font-headline-md text-headline-md">Récord personal</h3>
-        <p class="mt-xs font-body-md text-body-md opacity-90">{{ recordMessage() }}</p>
-        <p class="mt-xs font-label-sm text-label-sm opacity-90">{{ periodSessionsCount() }} sesiones en el periodo</p>
+        <p class="mt-xs font-body-md text-body-md opacity-90">{{ recordMessageValue }}</p>
+        <p class="mt-xs font-label-sm text-label-sm opacity-90">{{ periodSessionsCountValue }} sesiones en el periodo</p>
       </div>
       <span
         class="material-symbols-outlined absolute -bottom-5 -right-4 text-[120px] opacity-10">workspace_premium</span>

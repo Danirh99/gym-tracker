@@ -17,6 +17,11 @@ export class WorkoutSessionsFacade {
     return this.sessionService.getAllSessions();
   }
 
+  summaries(): Observable<WorkoutSessionListResponse> {
+    // Delegacion fina para listar historial ligero.
+    return this.sessionService.getAllSessionSummaries();
+  }
+
   byMonth(year: number, month: number): Observable<WorkoutSessionListResponse> {
     // Delegacion fina para el calendario mensual.
     return this.sessionService.getSessionsByMonth(year, month);

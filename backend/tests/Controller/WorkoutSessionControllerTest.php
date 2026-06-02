@@ -101,6 +101,30 @@ final class WorkoutSessionControllerTest extends TestCase
         self::assertSame('2026-04-10', $this->decode($response)['items'][0]['sessionDate']);
     }
 
+    public function testIndexReturnsLightweightSummariesWhenSummaryFilterIsProvided(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-04-10'), 'Full body');
+        $this->setId($session, 12);
+        $exercise = new Exercise('Bench press', ExerciseType::Strength);
+        $entry = new WorkoutEntry($session, $exercise, 1);
+        $entry->addWorkoutSet($this->workoutSet($entry, 1, static fn (WorkoutSet $set) => $set->setWeightKg(80.0)->setReps(5)));
+        $session->addWorkoutEntry($entry);
+
+        $this->workoutSessionRepository
+            ->expects($this->once())
+            ->method('findAllOrdered')
+            ->willReturn([$session]);
+
+        $response = $this->controller->index(new Request(['all' => '1', 'summary' => '1']));
+        $item = $this->decode($response)['items'][0];
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertSame(1, $item['exerciseCount']);
+        self::assertSame(1, $item['setCount']);
+        self::assertSame(400, $item['totalVolumeKg']);
+        self::assertSame([], $item['entries']);
+    }
+
     public function testCreateReturnsBadRequestWhenBodyIsNotJsonObject(): void
     {
         $this->entityManager->expects($this->never())->method('persist');

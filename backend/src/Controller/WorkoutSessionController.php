@@ -79,6 +79,7 @@ final class WorkoutSessionController extends AbstractController
         $year = $request->query->getInt('year', 0);
         $month = $request->query->getInt('month', 0);
         $all = filter_var($request->query->get('all', false), \FILTER_VALIDATE_BOOL);
+        $summary = filter_var($request->query->get('summary', false), \FILTER_VALIDATE_BOOL);
 
         if ($all) {
             $sessions = $this->workoutSessionRepository->findAllOrdered();
@@ -92,7 +93,9 @@ final class WorkoutSessionController extends AbstractController
         }
 
         $items = array_map(
-            fn (WorkoutSession $session): array => $this->workoutSessionAssembler->assemble($session),
+            fn (WorkoutSession $session): array => $summary
+                ? $this->workoutSessionAssembler->assembleSummary($session)
+                : $this->workoutSessionAssembler->assemble($session),
             $sessions,
         );
 

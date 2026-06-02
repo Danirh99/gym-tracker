@@ -31,6 +31,13 @@ export class WorkoutSessionService {
     });
   }
 
+  getAllSessionSummaries(): Observable<WorkoutSessionListResponse> {
+    // Recupera el historial sin entradas ni series para pantallas de resumen.
+    return this.http.get<WorkoutSessionListResponse>('/api/workout-sessions', {
+      params: { all: true, summary: true },
+    });
+  }
+
   getSession(id: number): Observable<WorkoutSessionResponse> {
     // Trae el detalle completo de una sesion.
     return this.http.get<WorkoutSessionResponse>(`/api/workout-sessions/${id}`);

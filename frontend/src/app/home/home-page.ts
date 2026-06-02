@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { addDays, startOfWeekMonday, toIsoDate } from '../core/utils/date.utils';
@@ -10,6 +10,7 @@ import { WorkoutSessionsFacade } from '../sessions/state/workout-sessions.facade
   selector: 'app-home-page',
   imports: [RouterLink, ThemeToggleButtonComponent],
   templateUrl: './home-page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
@@ -18,6 +19,12 @@ export class HomePage implements OnInit {
   allSessions: WorkoutSession[] = [];
   isLoadingSessions = true;
   sessionsErrorMessage: string | null = null;
+  weeklySessionCountValue = 0;
+  weeklyDurationLabelValue = '0m';
+  weeklyExerciseCountValue = 0;
+  weeklyVolumeLabelValue = '0 kg';
+  weeklyStreakDaysValue = 0;
+  weeklyAvgVolumePerSessionLabelValue = '0 kg';
 
   constructor(
     private readonly workoutSessionsFacade: WorkoutSessionsFacade,
@@ -25,98 +32,35 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Carga el resumen de inicio en paralelo.
-    this.loadRecentSessions();
-    this.loadAllSessions();
+    // Carga una version ligera del historial y deriva los indicadores de inicio.
+    this.loadSessionSummaries();
   }
 
-  loadRecentSessions(): void {
-    // Trae las ultimas sesiones para la tarjeta destacada.
+  loadSessionSummaries(): void {
+    // Trae el historial resumido sin duplicar peticiones ni descargar series completas.
     this.isLoadingSessions = true;
     this.sessionsErrorMessage = null;
 
     this.workoutSessionsFacade
-      .recent(3)
+      .summaries()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: ({ items }) => {
-          this.recentSessions = items;
+          this.allSessions = items;
+          this.recentSessions = items.slice(0, 3);
+          this.recomputeWeeklySummary();
           this.isLoadingSessions = false;
           this.changeDetectorRef.markForCheck();
         },
         error: () => {
           this.sessionsErrorMessage = 'No se han podido cargar los entrenamientos.';
+          this.allSessions = [];
+          this.recentSessions = [];
+          this.recomputeWeeklySummary();
           this.isLoadingSessions = false;
           this.changeDetectorRef.markForCheck();
         },
       });
-  }
-
-  loadAllSessions(): void {
-    // Carga todo el historial para calcular los indicadores semanales.
-    this.workoutSessionsFacade
-      .all()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ items }) => {
-          this.allSessions = items;
-          this.changeDetectorRef.markForCheck();
-        },
-        error: () => {
-          this.allSessions = [];
-          this.changeDetectorRef.markForCheck();
-        },
-      });
-  }
-
-  weeklySessionCount(): number {
-    // Total de sesiones dentro de la semana actual.
-    return this.weekSessions().length;
-  }
-
-  weeklyDurationLabel(): string {
-    // Suma duraciones y devuelve una etiqueta compacta.
-    const totalMinutes = this.weekSessions().reduce((total, session) => total + this.sessionDurationMinutes(session), 0);
-    return this.formatMinutes(totalMinutes);
-  }
-
-  weeklyExerciseCount(): number {
-    return this.weekSessions().reduce((total, session) => total + session.exerciseCount, 0);
-  }
-
-  weeklyVolumeLabel(): string {
-    const totalVolume = this.weekSessions().reduce((total, session) => total + session.totalVolumeKg, 0);
-    return `${this.formatNumber(totalVolume)} kg`;
-  }
-
-  weeklyStreakDays(): number {
-    // Cuenta racha consecutiva desde hoy hacia atras.
-    const today = new Date();
-    const monday = startOfWeekMonday(today);
-    const dates = new Set(this.weekSessions().map((session) => session.sessionDate));
-    let streak = 0;
-
-    for (let cursor = new Date(today); cursor >= monday; cursor = addDays(cursor, -1)) {
-      const iso = toIsoDate(cursor);
-      if (!dates.has(iso)) {
-        break;
-      }
-
-      streak += 1;
-    }
-
-    return streak;
-  }
-
-  weeklyAvgVolumePerSessionLabel(): string {
-    // Calcula el promedio de volumen por sesion en la semana.
-    const sessions = this.weekSessions();
-    if (sessions.length === 0) {
-      return '0 kg';
-    }
-
-    const totalVolume = sessions.reduce((total, session) => total + session.totalVolumeKg, 0);
-    return `${this.formatNumber(totalVolume / sessions.length)} kg`;
   }
 
   sessionDateLabel(session: WorkoutSession): string {
@@ -155,6 +99,39 @@ export class HomePage implements OnInit {
     const todayIso = toIsoDate(today);
     const weekStartIso = toIsoDate(startOfWeekMonday(today));
     return this.allSessions.filter((session) => session.sessionDate >= weekStartIso && session.sessionDate <= todayIso);
+  }
+
+  private recomputeWeeklySummary(): void {
+    // Mantiene el template libre de filtros y reducciones repetidas.
+    const sessions = this.weekSessions();
+    const totalMinutes = sessions.reduce((total, session) => total + this.sessionDurationMinutes(session), 0);
+    const totalVolume = sessions.reduce((total, session) => total + session.totalVolumeKg, 0);
+
+    this.weeklySessionCountValue = sessions.length;
+    this.weeklyDurationLabelValue = this.formatMinutes(totalMinutes);
+    this.weeklyExerciseCountValue = sessions.reduce((total, session) => total + session.exerciseCount, 0);
+    this.weeklyVolumeLabelValue = `${this.formatNumber(totalVolume)} kg`;
+    this.weeklyStreakDaysValue = this.computeWeeklyStreakDays(sessions);
+    this.weeklyAvgVolumePerSessionLabelValue = sessions.length === 0 ? '0 kg' : `${this.formatNumber(totalVolume / sessions.length)} kg`;
+  }
+
+  private computeWeeklyStreakDays(sessions: WorkoutSession[]): number {
+    // Cuenta racha consecutiva desde hoy hacia atras.
+    const today = new Date();
+    const monday = startOfWeekMonday(today);
+    const dates = new Set(sessions.map((session) => session.sessionDate));
+    let streak = 0;
+
+    for (let cursor = new Date(today); cursor >= monday; cursor = addDays(cursor, -1)) {
+      const iso = toIsoDate(cursor);
+      if (!dates.has(iso)) {
+        break;
+      }
+
+      streak += 1;
+    }
+
+    return streak;
   }
 
   private sessionDurationMinutes(session: WorkoutSession): number {

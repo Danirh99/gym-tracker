@@ -14,7 +14,6 @@ import { SideMenuService } from './side-menu.service';
       inset: 0;
       z-index: 1200;
       background: linear-gradient(140deg, rgba(15, 23, 42, 0.56), rgba(15, 23, 42, 0.38));
-      backdrop-filter: blur(3px);
       border: 0;
     }
 
