@@ -2,7 +2,8 @@ import { Injectable, signal } from '@angular/core';
 import { parseOptionalInt, parseOptionalNumber } from '../../core/utils/number.utils';
 import { normalizeOptionalString, normalizeSearchText } from '../../core/utils/string.utils';
 import { Exercise } from '../../exercises/exercise.model';
-import { CreateWorkoutSetPayload } from '../session.model';
+import { CreateWorkoutSetPayload, WorkoutEntry } from '../session.model';
+import { strengthSetToRow } from '../sets-mapping';
 import { StrengthSetRow } from '../ui/strength-sets-table.component';
 
 @Injectable()
@@ -30,6 +31,14 @@ export class StrengthEntryFormStore {
     // Guarda el ejercicio activo y su ultimo rendimiento.
     this.selectedExerciseId.set(exercise.id);
     this.exerciseHistory.set(exercise.lastPerformance);
+  }
+
+  initFromEntry(entry: WorkoutEntry, exercise: Exercise): void {
+    // Hidrata el formulario a partir de una entrada existente para soportar edicion.
+    this.selectedExerciseId.set(exercise.id);
+    this.exerciseHistory.set(exercise.lastPerformance);
+    this.notes.set(entry.notes ?? '');
+    this.sets.set(entry.sets.map((set, index) => strengthSetToRow(set, index)));
   }
 
   addSet(): void {

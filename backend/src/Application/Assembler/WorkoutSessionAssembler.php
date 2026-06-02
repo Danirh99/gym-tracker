@@ -25,7 +25,7 @@ final class WorkoutSessionAssembler
     ];
 
     /**
-     * @return array{id:int|null,name:string|null,displayName:string,sessionDate:string,mood:string|null,moodLabel:string|null,notes:string|null,startedAt:string|null,finishedAt:string|null,exerciseCount:int,setCount:int,totalVolumeKg:float,cardioDurationSeconds:int,entries:list<array{id:int|null,exerciseName:string,type:string,typeLabel:string,notes:string|null,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}>}
+     * @return array{id:int|null,name:string|null,displayName:string,sessionDate:string,mood:string|null,moodLabel:string|null,notes:string|null,startedAt:string|null,finishedAt:string|null,exerciseCount:int,setCount:int,totalVolumeKg:float,cardioDurationSeconds:int,entries:list<array{id:int|null,exerciseId:int,exerciseName:string,type:string,typeLabel:string,notes:string|null,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}>}
      */
     public function assemble(WorkoutSession $session): array
     {
@@ -68,7 +68,7 @@ final class WorkoutSessionAssembler
     }
 
     /**
-     * @return array{id:int|null,exerciseName:string,type:string,typeLabel:string,notes:string|null,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}
+     * @return array{id:int|null,exerciseId:int,exerciseName:string,type:string,typeLabel:string,notes:string|null,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}
      */
     private function serializeWorkoutEntry(WorkoutEntry $entry): array
     {
@@ -77,6 +77,7 @@ final class WorkoutSessionAssembler
 
         return [
             'id' => $entry->getId(),
+            'exerciseId' => $entry->getExercise()->getId(),
             'exerciseName' => $entry->getExercise()->getName(),
             'type' => $entry->getExercise()->getType()->value,
             'typeLabel' => $this->typeLabel($entry->getExercise()->getType()),

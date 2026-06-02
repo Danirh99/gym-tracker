@@ -24,6 +24,7 @@ describe('SessionDetailStore', () => {
   function createEntry(): WorkoutEntry {
     return {
       id: 10,
+      exerciseId: 1,
       exerciseName: 'Press',
       type: 'strength',
       typeLabel: 'Fuerza',

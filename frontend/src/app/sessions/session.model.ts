@@ -18,6 +18,7 @@ export interface WorkoutSet {
 
 export interface WorkoutEntry {
   id: number;
+  exerciseId: number;
   exerciseName: string;
   type: ExerciseType;
   typeLabel: string;

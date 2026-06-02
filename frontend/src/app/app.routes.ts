@@ -13,6 +13,16 @@ export const routes: Routes = [
   { path: 'alerts', loadComponent: () => import('./alerts/alerts-page').then((m) => m.AlertsPage) },
   // Alta de sesiones.
   { path: 'sessions/new', loadComponent: () => import('./sessions/new-session-page').then((m) => m.NewSessionPage) },
+  // Edicion de ejercicio de fuerza dentro de una sesion.
+  {
+    path: 'sessions/:id/exercises/:entryId/edit/strength',
+    loadComponent: () => import('./sessions/add-session-exercise-page').then((m) => m.AddSessionExercisePage),
+  },
+  // Edicion de ejercicio por tipo dinamico dentro de una sesion.
+  {
+    path: 'sessions/:id/exercises/:entryId/edit/:type',
+    loadComponent: () => import('./sessions/add-session-exercise-by-type-page').then((m) => m.AddSessionExerciseByTypePage),
+  },
   // Alta de ejercicio de fuerza dentro de una sesion.
   {
     path: 'sessions/:id/exercises/new/strength',

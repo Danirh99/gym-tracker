@@ -2,14 +2,13 @@ import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { addDays, startOfWeekMonday, toIsoDate } from '../core/utils/date.utils';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { WorkoutSession } from '../sessions/session.model';
 import { WorkoutSessionsFacade } from '../sessions/state/workout-sessions.facade';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [RouterLink, ThemeToggleButtonComponent],
   templateUrl: './home-page.html',
 })
 export class HomePage implements OnInit {

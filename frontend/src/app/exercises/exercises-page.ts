@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { normalizeSearchText } from '../core/utils/string.utils';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { Exercise, ExerciseType } from './exercise.model';
 import { ExercisesFacade } from './state/exercises.facade';
@@ -16,7 +15,7 @@ interface FilterChip {
 
 @Component({
   selector: 'app-exercises-page',
-  imports: [FormsModule, RouterLink, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [FormsModule, RouterLink, ThemeToggleButtonComponent],
   templateUrl: './exercises-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

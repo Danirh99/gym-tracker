@@ -14,9 +14,11 @@ Punto de entrada rapido a la documentacion del repo.
 8. `08-arquitectura-frontend.md` - estructura real del frontend Angular.
 9. `09-componentes-compartidos.md` - shared, pipes, toasts y dialogs.
 10. `10-testing.md` - estrategia minima de pruebas y cobertura.
+11. `11-web-presentacion.md` - definicion de landing publica, copy y wireframes ASCII.
 
 ## Recomendacion de lectura
 
 1. Empieza por `01`, `02` y `04` para entender producto y dominio.
 2. Sigue con `08` y `09` para entender la implementacion real.
 3. Usa `10` cuando quieras ampliar tests o validar cambios.
+4. Usa `11` cuando quieras crear la web de presentacion del proyecto.

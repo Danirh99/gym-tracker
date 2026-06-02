@@ -7,8 +7,10 @@ namespace App\Controller;
 use App\Application\Assembler\WorkoutSessionAssembler;
 use App\Application\Factory\AddWorkoutEntryInputFactory;
 use App\Application\Service\WorkoutEntryCreator;
+use App\Application\Service\WorkoutEntryUpdater;
 use App\Application\Validation\AddWorkoutEntryInputValidator;
 use App\Entity\WorkoutSession;
+use App\Entity\WorkoutEntry;
 use App\Repository\ExerciseRepository;
 use App\Repository\WorkoutEntryRepository;
 use App\Repository\WorkoutSessionRepository;
@@ -31,6 +33,8 @@ final class WorkoutSessionController extends AbstractController
     private readonly AddWorkoutEntryInputValidator $addWorkoutEntryInputValidator;
 
     private readonly WorkoutEntryCreator $workoutEntryCreator;
+
+    private readonly WorkoutEntryUpdater $workoutEntryUpdater;
 
     /**
      * Etiquetas públicas para los valores técnicos de sensación general.
@@ -60,11 +64,13 @@ final class WorkoutSessionController extends AbstractController
         ?AddWorkoutEntryInputFactory $addWorkoutEntryInputFactory = null,
         ?AddWorkoutEntryInputValidator $addWorkoutEntryInputValidator = null,
         ?WorkoutEntryCreator $workoutEntryCreator = null,
+        ?WorkoutEntryUpdater $workoutEntryUpdater = null,
     ) {
         $this->workoutSessionAssembler = $workoutSessionAssembler ?? new WorkoutSessionAssembler();
         $this->addWorkoutEntryInputFactory = $addWorkoutEntryInputFactory ?? new AddWorkoutEntryInputFactory();
         $this->addWorkoutEntryInputValidator = $addWorkoutEntryInputValidator ?? new AddWorkoutEntryInputValidator();
         $this->workoutEntryCreator = $workoutEntryCreator ?? new WorkoutEntryCreator($this->entityManager);
+        $this->workoutEntryUpdater = $workoutEntryUpdater ?? new WorkoutEntryUpdater($this->entityManager);
     }
 
     #[Route('/api/workout-sessions', name: 'api_workout_sessions_index', methods: ['GET'])]
@@ -208,6 +214,46 @@ final class WorkoutSessionController extends AbstractController
         $session->removeWorkoutEntry($entry);
         $this->entityManager->remove($entry);
         $this->entityManager->flush();
+
+        return $this->json(['item' => $this->workoutSessionAssembler->assemble($session)]);
+    }
+
+    #[Route('/api/workout-sessions/{id}/entries/{entryId}', name: 'api_workout_sessions_update_entry', requirements: ['id' => '\\d+', 'entryId' => '\\d+'], methods: ['PUT'])]
+    public function updateEntry(int $id, int $entryId, Request $request): JsonResponse
+    {
+        $session = $this->workoutSessionRepository->find($id);
+
+        if (!$session instanceof WorkoutSession) {
+            return $this->json(['message' => 'Sesión no encontrada.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $entry = $this->workoutEntryRepository->find($entryId);
+
+        if (!$entry instanceof WorkoutEntry || $entry->getWorkoutSession()->getId() !== $session->getId()) {
+            return $this->json(['message' => 'Ejercicio de sesión no encontrado.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $payload = json_decode($request->getContent(), true);
+
+        if (!is_array($payload)) {
+            return $this->json(['message' => 'El cuerpo de la petición no es válido.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $input = $this->addWorkoutEntryInputFactory->fromArray($payload);
+
+        $exercise = $this->exerciseRepository->find($input->exerciseId);
+
+        if ($exercise === null || !$exercise->isActive() || $exercise->getId() !== $entry->getExercise()->getId()) {
+            return $this->json(['message' => 'Ejercicio no encontrado.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $errors = $this->addWorkoutEntryInputValidator->validate($input, $exercise->getType());
+
+        if ($errors !== []) {
+            return $this->json(['message' => 'Hay errores de validación.', 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $this->workoutEntryUpdater->update($entry, $exercise, $input);
 
         return $this->json(['item' => $this->workoutSessionAssembler->assemble($session)]);
     }

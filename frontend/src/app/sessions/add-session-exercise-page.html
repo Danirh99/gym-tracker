@@ -9,7 +9,7 @@
         <span class="material-symbols-outlined text-on-surface">arrow_back</span>
       </a>
       }
-      <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Añadir ejercicio</h1>
+      <h1 class="font-headline-md text-headline-md font-bold text-on-surface">{{ pageTitle }}</h1>
     </div>
     <app-theme-toggle-button />
   </header>
@@ -72,8 +72,8 @@
           aria-hidden="true"></span>
         <span>Guardando...</span>
         } @else {
-        <span class="material-symbols-outlined filled-icon">save</span>
-        <span>Guardar</span>
+          <span class="material-symbols-outlined filled-icon">save</span>
+          <span>{{ saveLabel }}</span>
         }
       </button>
     </div>
@@ -87,7 +87,7 @@
 
   @if (toastMessage) {
   <div
-    class="animate-toast-enter fixed bottom-[108px] left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2"
+    class="animate-toast-enter fixed bottom-4 left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2"
     [ngClass]="toastTone === 'error' ? 'border border-error/60' : 'border border-primary-container/60'">
     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
       [ngClass]="toastTone === 'error' ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'"

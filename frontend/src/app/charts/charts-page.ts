@@ -5,7 +5,6 @@ import { formatNumberEs } from '../core/utils/format.utils';
 import { ChartPeriod, ChartsAnalyticsService, VolumePoint } from './charts-analytics.service';
 import { ExerciseType, WorkoutSession } from '../sessions/session.model';
 import { WorkoutSessionsFacade } from '../sessions/state/workout-sessions.facade';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 
 interface DayMetric {
@@ -22,7 +21,7 @@ interface TypeStatCard {
 
 @Component({
   selector: 'app-charts-page',
-  imports: [NgClass, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [NgClass, ThemeToggleButtonComponent],
   templateUrl: './charts-page.html',
 })
 export class ChartsPage implements OnInit {

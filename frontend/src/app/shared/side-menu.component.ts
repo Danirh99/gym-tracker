@@ -103,6 +103,63 @@ import { SideMenuService } from './side-menu.service';
         <nav aria-label="Secciones" class="menu-card rounded-2xl p-2.5">
           <a
             class="menu-link flex items-center justify-between rounded-xl px-4 py-3 text-on-surface hover:bg-surface-container-high"
+            routerLink="/"
+            routerLinkActive="menu-link-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()"
+          >
+            <span class="flex items-center gap-3">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+              </span>
+              <span class="font-label-md text-label-md">Inicio</span>
+            </span>
+            <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          </a>
+          <a
+            class="menu-link flex items-center justify-between rounded-xl px-4 py-3 text-on-surface hover:bg-surface-container-high"
+            routerLink="/exercises"
+            routerLinkActive="menu-link-active"
+            (click)="closeMenu()"
+          >
+            <span class="flex items-center gap-3">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                <span class="material-symbols-outlined text-[20px]">fitness_center</span>
+              </span>
+              <span class="font-label-md text-label-md">Ejercicios</span>
+            </span>
+            <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          </a>
+          <a
+            class="menu-link flex items-center justify-between rounded-xl px-4 py-3 text-on-surface hover:bg-surface-container-high"
+            routerLink="/calendar"
+            routerLinkActive="menu-link-active"
+            (click)="closeMenu()"
+          >
+            <span class="flex items-center gap-3">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+              </span>
+              <span class="font-label-md text-label-md">Calendario</span>
+            </span>
+            <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          </a>
+          <a
+            class="menu-link flex items-center justify-between rounded-xl px-4 py-3 text-on-surface hover:bg-surface-container-high"
+            routerLink="/charts"
+            routerLinkActive="menu-link-active"
+            (click)="closeMenu()"
+          >
+            <span class="flex items-center gap-3">
+              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+              </span>
+              <span class="font-label-md text-label-md">Gráficas</span>
+            </span>
+            <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          </a>
+          <a
+            class="menu-link flex items-center justify-between rounded-xl px-4 py-3 text-on-surface hover:bg-surface-container-high"
             routerLink="/alerts"
             routerLinkActive="menu-link-active"
             (click)="closeMenu()"

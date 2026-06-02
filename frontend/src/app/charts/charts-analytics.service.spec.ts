@@ -18,7 +18,7 @@ describe('ChartsAnalyticsService', () => {
       setCount: 1,
       totalVolumeKg: 100,
       cardioDurationSeconds: 120,
-      entries: [{ id: 1, exerciseName: 'Press', type: 'strength', typeLabel: 'Fuerza', notes: null, sets: [{ setNumber: 1, weightKg: 50, reps: 2, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null }] }],
+      entries: [{ id: 1, exerciseId: 1, exerciseName: 'Press', type: 'strength', typeLabel: 'Fuerza', notes: null, sets: [{ setNumber: 1, weightKg: 50, reps: 2, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null }] }],
     },
   ];
 

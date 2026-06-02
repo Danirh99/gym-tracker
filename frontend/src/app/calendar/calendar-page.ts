@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angul
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { NumberEsPipe } from '../shared/pipes/number-es.pipe';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { WorkoutSession } from '../sessions/session.model';
@@ -11,7 +10,7 @@ import { CalendarDay, CalendarDomainService } from './calendar-domain.service';
 
 @Component({
   selector: 'app-calendar-page',
-  imports: [NgClass, NumberEsPipe, RouterLink, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [NgClass, NumberEsPipe, RouterLink, ThemeToggleButtonComponent],
   templateUrl: './calendar-page.html',
 })
 export class CalendarPage implements OnInit {

@@ -3,7 +3,7 @@
   "short_name": "GymTracker",
   "description": "Registra entrenamientos y sigue tu progreso.",
   "theme_color": "#0f172a",
-  "background_color": "#f8fafc",
+  "background_color": "#0f172a",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",

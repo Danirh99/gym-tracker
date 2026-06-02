@@ -4,3 +4,4 @@ backend/vendor/
 backend/var/
 .env.local
 docker-compose.override.yml
+web/

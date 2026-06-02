@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Exercise, ExerciseType } from '../exercises/exercise.model';
-import { AddSessionExercisePayload } from './session.model';
+import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { ExercisesFacade } from '../exercises/state/exercises.facade';
 import { TypedEntryFormStore, SupportedType } from './state/typed-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
@@ -33,6 +33,8 @@ export class AddSessionExerciseByTypePage implements OnInit {
 
   /** Id de sesion al que se agrega la entrada. */
   sessionId: number | null = null;
+  /** Id de entrada a editar cuando la ruta es de edicion. */
+  entryId: number | null = null;
   /** Catalogo de ejercicios filtrado por tipo dinamico de ruta. */
   exercises: Exercise[] = [];
 
@@ -54,6 +56,14 @@ export class AddSessionExerciseByTypePage implements OnInit {
 
   get type(): SupportedType {
     return this.formStore.type();
+  }
+
+  get isEditMode(): boolean {
+    return this.entryId !== null;
+  }
+
+  get pageTitle(): string {
+    return this.isEditMode ? 'Editar ejercicio' : `Añadir ${this.typeLabel()}`;
   }
 
   get searchTerm(): string {
@@ -100,6 +110,8 @@ export class AddSessionExerciseByTypePage implements OnInit {
     // Resuelve y valida parametros de ruta necesarios para la pantalla.
     const id = Number(this.route.snapshot.paramMap.get('id'));
     const type = this.route.snapshot.paramMap.get('type');
+    const rawEntryId = this.route.snapshot.paramMap.get('entryId');
+    const entryId = rawEntryId === null ? null : Number(rawEntryId);
 
     if (!Number.isInteger(id) || id <= 0 || !this.isSupportedType(type)) {
       this.errorMessage = 'La ruta solicitada no es válida.';
@@ -108,8 +120,22 @@ export class AddSessionExerciseByTypePage implements OnInit {
       return;
     }
 
+    if (entryId !== null && (!Number.isInteger(entryId) || entryId <= 0)) {
+      this.errorMessage = 'El ejercicio solicitado no es válido.';
+      this.isLoading = false;
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
     this.sessionId = id;
+    this.entryId = entryId;
     this.formStore.initType(type);
+
+    if (this.isEditMode) {
+      this.loadSessionAndExercises();
+      return;
+    }
+
     this.loadExercises();
   }
 
@@ -175,6 +201,10 @@ export class AddSessionExerciseByTypePage implements OnInit {
       return;
     }
 
+    if (this.isEditMode && this.entryId === null) {
+      return;
+    }
+
     this.isSaving = true;
     this.errorMessage = null;
 
@@ -184,18 +214,26 @@ export class AddSessionExerciseByTypePage implements OnInit {
       sets: this.formStore.buildSetsPayload(),
     };
 
-    this.workoutSessionsFacade
-      .addEntry(this.sessionId, payload)
+    const selectedExerciseId = this.selectedExerciseId;
+    const request$ = this.isEditMode
+      ? this.workoutSessionsFacade.updateEntry(this.sessionId, this.entryId as number, payload)
+      : this.workoutSessionsFacade.addEntry(this.sessionId, payload);
+
+    request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          const exerciseName = this.exercises.find((exercise) => exercise.id === this.selectedExerciseId)?.name.trim() ?? '';
-          const message = exerciseName === '' ? 'Ejercicio agregado a la sesion.' : `Ejercicio agregado: ${exerciseName}`;
+          const exerciseName = this.exercises.find((exercise) => exercise.id === selectedExerciseId)?.name.trim() ?? '';
+          const message = this.isEditMode
+            ? (exerciseName === '' ? 'Ejercicio actualizado.' : `Ejercicio actualizado: ${exerciseName}`)
+            : (exerciseName === '' ? 'Ejercicio agregado a la sesion.' : `Ejercicio agregado: ${exerciseName}`);
           window.sessionStorage.setItem('sessionToast', message);
           void this.router.navigate(['/sessions', this.sessionId]);
         },
         error: () => {
-          this.errorMessage = 'No se ha podido guardar el ejercicio.';
+          this.errorMessage = this.isEditMode
+            ? 'No se ha podido actualizar el ejercicio.'
+            : 'No se ha podido guardar el ejercicio.';
           this.isSaving = false;
         },
       });
@@ -243,6 +281,73 @@ export class AddSessionExerciseByTypePage implements OnInit {
         next: (response) => {
           const items = Array.isArray(response?.items) ? response.items : [];
           this.exercises = items.filter((exercise) => exercise.type === this.type);
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+        error: () => {
+          this.errorMessage = 'No se han podido cargar los ejercicios.';
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+      });
+  }
+
+  private loadSessionAndExercises(): void {
+    // Carga la sesion para localizar la entrada objetivo y luego el catalogo para hidratarla.
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    this.workoutSessionsFacade
+      .detail(this.sessionId as number)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ item }) => {
+          const entry = item.entries.find((candidate) => candidate.id === this.entryId) ?? null;
+
+          if (entry === null) {
+            this.errorMessage = 'El ejercicio solicitado no es válido.';
+            this.isLoading = false;
+            this.changeDetectorRef.markForCheck();
+            return;
+          }
+
+          this.loadExercisesForEdit(entry);
+        },
+        error: () => {
+          this.errorMessage = 'No se ha podido cargar la sesión.';
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+      });
+  }
+
+  private loadExercisesForEdit(entry: WorkoutEntry): void {
+    // Verifica que la entrada coincide con el tipo de la ruta y luego hidrata el formulario.
+    if (entry.type !== this.type) {
+      this.errorMessage = 'Este ejercicio no corresponde al tipo seleccionado.';
+      this.isLoading = false;
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    this.exercisesFacade
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const items = Array.isArray(response?.items) ? response.items : [];
+          this.exercises = items.filter((exercise) => exercise.type === this.type);
+
+          const linkedExercise = this.exercises.find((exercise) => exercise.id === entry.exerciseId);
+
+          if (linkedExercise === undefined) {
+            this.errorMessage = 'El ejercicio ya no está disponible en el catálogo.';
+            this.isLoading = false;
+            this.changeDetectorRef.markForCheck();
+            return;
+          }
+
+          this.formStore.initFromEntry(entry, linkedExercise);
           this.isLoading = false;
           this.changeDetectorRef.markForCheck();
         },

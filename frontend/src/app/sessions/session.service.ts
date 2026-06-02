@@ -45,4 +45,9 @@ export class WorkoutSessionService {
     // Borra una entrada concreta de la sesion.
     return this.http.delete<WorkoutSessionResponse>(`/api/workout-sessions/${sessionId}/entries/${entryId}`);
   }
+
+  updateSessionExercise(sessionId: number, entryId: number, payload: AddSessionExercisePayload): Observable<WorkoutSessionResponse> {
+    // Actualiza notas y series de una entrada existente.
+    return this.http.put<WorkoutSessionResponse>(`/api/workout-sessions/${sessionId}/entries/${entryId}`, payload);
+  }
 }

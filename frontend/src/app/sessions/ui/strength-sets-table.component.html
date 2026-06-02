@@ -13,10 +13,10 @@
         <tr class="border-b border-surface-container-low last:border-b-0">
           <td class="px-md py-3 font-body-md font-bold text-on-surface">{{ set.setNumber }}</td>
           <td class="px-md py-3">
-            <input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.weightKg" [ngModelOptions]="{ standalone: true }" inputmode="decimal" placeholder="kg" type="text" />
+            <input class="w-24 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body-md text-on-surface placeholder:text-outline focus:border-primary-container focus:outline-none dark:bg-surface-container" [(ngModel)]="set.weightKg" [ngModelOptions]="{ standalone: true }" inputmode="decimal" placeholder="kg" type="text" />
           </td>
           <td class="px-md py-3">
-            <input class="w-24 rounded-lg border border-outline-variant bg-white/80 px-3 py-1.5 font-body-md" [(ngModel)]="set.reps" [ngModelOptions]="{ standalone: true }" inputmode="numeric" placeholder="reps" type="text" />
+            <input class="w-24 rounded-lg border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body-md text-on-surface placeholder:text-outline focus:border-primary-container focus:outline-none dark:bg-surface-container" [(ngModel)]="set.reps" [ngModelOptions]="{ standalone: true }" inputmode="numeric" placeholder="reps" type="text" />
           </td>
           <td class="px-md py-3 text-center">
             <button

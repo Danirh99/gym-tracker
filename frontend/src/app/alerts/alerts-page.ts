@@ -7,7 +7,6 @@ import { Exercise } from '../exercises/exercise.model';
 import { ExercisesFacade } from '../exercises/state/exercises.facade';
 import { WorkoutSession } from '../sessions/session.model';
 import { WorkoutSessionsFacade } from '../sessions/state/workout-sessions.facade';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 
 type AlertTone = 'critical' | 'warning' | 'info';
@@ -23,7 +22,7 @@ interface AlertItem {
 
 @Component({
   selector: 'app-alerts-page',
-  imports: [RouterLink, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [RouterLink, ThemeToggleButtonComponent],
   templateUrl: './alerts-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Exercise } from '../exercises/exercise.model';
 import { ExercisesFacade } from '../exercises/state/exercises.facade';
-import { AddSessionExercisePayload } from './session.model';
+import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { StrengthEntryFormStore } from './state/strength-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
@@ -24,8 +24,10 @@ import { StrengthSetRow, StrengthSetsTableComponent } from './ui/strength-sets-t
 export class AddSessionExercisePage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
-  /** Id de sesion destino de la nueva entrada. */
+  /** Id de sesion destino de la nueva entrada o la entrada editada. */
   sessionId: number | null = null;
+  /** Id de entrada a editar cuando la ruta es de edicion. */
+  entryId: number | null = null;
   /** Catalogo de ejercicios filtrado por tipo fuerza. */
   exercises: Exercise[] = [];
   isLoading = true;
@@ -43,6 +45,18 @@ export class AddSessionExercisePage implements OnInit {
     readonly formStore: StrengthEntryFormStore,
     readonly toastStore: UiToastStore,
   ) {}
+
+  get isEditMode(): boolean {
+    return this.entryId !== null;
+  }
+
+  get pageTitle(): string {
+    return this.isEditMode ? 'Editar ejercicio' : 'Añadir ejercicio';
+  }
+
+  get saveLabel(): string {
+    return this.isEditMode ? 'Guardar cambios' : 'Guardar';
+  }
 
   get searchTerm(): string {
     return this.formStore.searchTerm();
@@ -83,6 +97,8 @@ export class AddSessionExercisePage implements OnInit {
   ngOnInit(): void {
     // Valida id de ruta y prepara carga inicial.
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    const rawEntryId = this.route.snapshot.paramMap.get('entryId');
+    const entryId = rawEntryId === null ? null : Number(rawEntryId);
 
     if (!Number.isInteger(id) || id <= 0) {
       this.errorMessage = 'La sesión solicitada no es válida.';
@@ -91,7 +107,21 @@ export class AddSessionExercisePage implements OnInit {
       return;
     }
 
+    if (entryId !== null && (!Number.isInteger(entryId) || entryId <= 0)) {
+      this.errorMessage = 'El ejercicio solicitado no es válido.';
+      this.isLoading = false;
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
     this.sessionId = id;
+    this.entryId = entryId;
+
+    if (this.isEditMode) {
+      this.loadSessionAndExercises();
+      return;
+    }
+
     this.loadExercises();
   }
 
@@ -147,6 +177,10 @@ export class AddSessionExercisePage implements OnInit {
       return;
     }
 
+    if (this.isEditMode && this.entryId === null) {
+      return;
+    }
+
     this.isSaving = true;
     this.errorMessage = null;
 
@@ -156,19 +190,26 @@ export class AddSessionExercisePage implements OnInit {
       sets: this.formStore.buildSetsPayload(),
     };
 
-    this.workoutSessionsFacade
-      .addEntry(this.sessionId, payload)
+    const selectedExerciseId = this.selectedExerciseId;
+    const request$ = this.isEditMode
+      ? this.workoutSessionsFacade.updateEntry(this.sessionId, this.entryId as number, payload)
+      : this.workoutSessionsFacade.addEntry(this.sessionId, payload);
+
+    request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          // Propaga un toast de exito para mostrar en la pantalla de destino.
-          const exerciseName = this.exercises.find((exercise) => exercise.id === this.selectedExerciseId)?.name.trim() ?? '';
-          const message = exerciseName === '' ? 'Ejercicio agregado a la sesion.' : `Ejercicio agregado: ${exerciseName}`;
+          const exerciseName = this.exercises.find((exercise) => exercise.id === selectedExerciseId)?.name.trim() ?? '';
+          const message = this.isEditMode
+            ? (exerciseName === '' ? 'Ejercicio actualizado.' : `Ejercicio actualizado: ${exerciseName}`)
+            : (exerciseName === '' ? 'Ejercicio agregado a la sesion.' : `Ejercicio agregado: ${exerciseName}`);
           window.sessionStorage.setItem('sessionToast', message);
           void this.router.navigate(['/sessions', this.sessionId]);
         },
         error: () => {
-          this.errorMessage = 'No se ha podido guardar el ejercicio.';
+          this.errorMessage = this.isEditMode
+            ? 'No se ha podido actualizar el ejercicio.'
+            : 'No se ha podido guardar el ejercicio.';
           this.isSaving = false;
         },
       });
@@ -191,6 +232,73 @@ export class AddSessionExercisePage implements OnInit {
         next: (response) => {
           const items = Array.isArray(response?.items) ? response.items : [];
           this.exercises = items.filter((exercise) => exercise.type === 'strength');
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+        error: () => {
+          this.errorMessage = 'No se han podido cargar los ejercicios.';
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+      });
+  }
+
+  private loadSessionAndExercises(): void {
+    // Carga sesion, catalogo y entrada objetivo en paralelo para soportar edicion.
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    this.workoutSessionsFacade
+      .detail(this.sessionId as number)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ item }) => {
+          const entry = item.entries.find((candidate) => candidate.id === this.entryId) ?? null;
+
+          if (entry === null) {
+            this.errorMessage = 'El ejercicio solicitado no es válido.';
+            this.isLoading = false;
+            this.changeDetectorRef.markForCheck();
+            return;
+          }
+
+          this.loadExercisesForEdit(entry);
+        },
+        error: () => {
+          this.errorMessage = 'No se ha podido cargar la sesión.';
+          this.isLoading = false;
+          this.changeDetectorRef.markForCheck();
+        },
+      });
+  }
+
+  private loadExercisesForEdit(entry: WorkoutEntry): void {
+    // Carga catalogo y filtra por fuerza; si la entrada no es de fuerza, error.
+    this.exercisesFacade
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const items = Array.isArray(response?.items) ? response.items : [];
+          this.exercises = items.filter((exercise) => exercise.type === 'strength');
+
+          if (entry.type !== 'strength') {
+            this.errorMessage = 'Este ejercicio no es de fuerza.';
+            this.isLoading = false;
+            this.changeDetectorRef.markForCheck();
+            return;
+          }
+
+          const linkedExercise: Exercise | undefined = this.exercises.find((exercise) => exercise.id === entry.exerciseId);
+
+          if (linkedExercise === undefined) {
+            this.errorMessage = 'El ejercicio ya no está disponible en el catálogo.';
+            this.isLoading = false;
+            this.changeDetectorRef.markForCheck();
+            return;
+          }
+
+          this.formStore.initFromEntry(entry, linkedExercise);
           this.isLoading = false;
           this.changeDetectorRef.markForCheck();
         },

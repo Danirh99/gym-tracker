@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background pb-[120px] text-on-background">
+<div class="min-h-screen bg-background pb-32 text-on-background">
   <header class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
     <div class="flex items-center gap-sm">
       <span class="material-symbols-outlined text-[32px] text-primary">calendar_month</span>
@@ -62,14 +62,14 @@
             [ngClass]="{
               'text-on-surface hover:bg-primary-container/15': day.inCurrentMonth && !isSelected(day),
               'text-outline-variant': !day.inCurrentMonth,
-              'bg-primary text-on-primary ring-4 ring-primary-container/35': isSelected(day)
+              'bg-primary-container text-on-primary-container ring-4 ring-primary/30': isSelected(day)
             }"
             (click)="selectDay(day)"
             type="button"
           >
             <span>{{ day.day }}</span>
             @if (isTrained(day)) {
-              <span class="absolute bottom-1 h-1.5 w-1.5 rounded-full" [ngClass]="isSelected(day) ? 'bg-on-primary' : 'bg-primary'"></span>
+              <span class="absolute bottom-1 h-1.5 w-1.5 rounded-full" [ngClass]="isSelected(day) ? 'bg-on-primary-container' : 'bg-primary'"></span>
             }
           </button>
         }
@@ -122,6 +122,4 @@
       </section>
     }
   </main>
-
-  <app-bottom-nav></app-bottom-nav>
 </div>

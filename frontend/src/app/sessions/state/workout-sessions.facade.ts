@@ -41,4 +41,9 @@ export class WorkoutSessionsFacade {
     // Delegacion fina para borrar una entrada.
     return this.sessionService.deleteSessionExercise(sessionId, entryId);
   }
+
+  updateEntry(sessionId: number, entryId: number, payload: Parameters<WorkoutSessionService['addExerciseToSession']>[1]): Observable<WorkoutSessionResponse> {
+    // Delegacion fina para actualizar una entrada existente.
+    return this.sessionService.updateSessionExercise(sessionId, entryId, payload);
+  }
 }

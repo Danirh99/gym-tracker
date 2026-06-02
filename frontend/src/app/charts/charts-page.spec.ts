@@ -25,6 +25,7 @@ describe('ChartsPage', () => {
       entries: [
         {
           id: 11,
+          exerciseId: 1,
           exerciseName: 'Cinta',
           type: 'cardio',
           typeLabel: 'Cardio',
@@ -63,6 +64,7 @@ describe('ChartsPage', () => {
       entries: [
         {
           id: 12,
+          exerciseId: 2,
           exerciseName: 'Remo',
           type: 'cardio',
           typeLabel: 'Cardio',

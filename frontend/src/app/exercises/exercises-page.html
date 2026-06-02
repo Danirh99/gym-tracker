@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background pb-[110px] text-on-background antialiased">
+<div class="min-h-screen bg-background text-on-background antialiased">
   <header class="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-margin-mobile py-md md:px-margin-desktop">
     <div class="flex items-center gap-sm">
       <span class="material-symbols-outlined text-[32px] text-primary">fitness_center</span>
@@ -115,13 +115,11 @@
   </main>
 
   @if (toastMessage) {
-    <div class="animate-toast-enter fixed bottom-[100px] left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl border border-primary-container/60 bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2">
+    <div class="animate-toast-enter fixed bottom-4 left-4 right-4 z-[60] mx-auto flex w-auto max-w-none items-center gap-sm rounded-2xl border border-primary-container/60 bg-on-surface px-4 py-3 text-inverse-on-surface shadow-[0_18px_60px_rgba(19,27,46,0.22)] md:bottom-8 md:left-1/2 md:right-auto md:w-[448px] md:-translate-x-1/2">
       <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container" aria-hidden="true">
         <span class="material-symbols-outlined filled-icon block text-[24px] leading-none">check</span>
       </span>
       <p class="flex-1 whitespace-normal font-label-md text-label-md">{{ toastMessage }}</p>
     </div>
   }
-
-  <app-bottom-nav></app-bottom-nav>
 </div>

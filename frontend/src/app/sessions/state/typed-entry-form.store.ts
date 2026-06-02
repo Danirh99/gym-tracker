@@ -2,7 +2,8 @@ import { Injectable, signal } from '@angular/core';
 import { parseOptionalInt, parseOptionalNumber } from '../../core/utils/number.utils';
 import { normalizeOptionalString, normalizeSearchText } from '../../core/utils/string.utils';
 import { Exercise } from '../../exercises/exercise.model';
-import { CreateWorkoutSetPayload } from '../session.model';
+import { CreateWorkoutSetPayload, WorkoutEntry } from '../session.model';
+import { cardioSetToRow, coreOtherSetToRow } from '../sets-mapping';
 import { CardioSetRow } from '../ui/cardio-sets-table.component';
 import { CoreOtherSetRow } from '../ui/core-other-sets-table.component';
 
@@ -46,6 +47,20 @@ export class TypedEntryFormStore {
     // Guarda ejercicio y contexto de rendimiento previo.
     this.selectedExerciseId.set(exercise.id);
     this.selectedExerciseHistory.set(exercise.lastPerformance);
+  }
+
+  initFromEntry(entry: WorkoutEntry, exercise: Exercise): void {
+    // Hidrata el formulario desde una entrada existente para soportar edicion.
+    this.selectedExerciseId.set(exercise.id);
+    this.selectedExerciseHistory.set(exercise.lastPerformance);
+    this.notes.set(entry.notes ?? '');
+
+    if (this.type() === 'cardio') {
+      this.cardioSets.set(entry.sets.map((set, index) => cardioSetToRow(set, index)));
+      return;
+    }
+
+    this.coreOtherSets.set(entry.sets.map((set, index) => coreOtherSetToRow(set, index)));
   }
 
   addSet(): void {

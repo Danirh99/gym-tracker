@@ -3,7 +3,6 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { todayIsoDate } from '../core/utils/date.utils';
 import { normalizeOptionalString } from '../core/utils/string.utils';
-import { BottomNavComponent } from '../shared/bottom-nav.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { WorkoutMood } from './session.model';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
@@ -16,7 +15,7 @@ interface MoodOption {
 
 @Component({
   selector: 'app-new-session-page',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggleButtonComponent, BottomNavComponent],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleButtonComponent],
   templateUrl: './new-session-page.html',
 })
 export class NewSessionPage {

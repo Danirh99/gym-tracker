@@ -288,6 +288,8 @@ final class WorkoutSessionControllerTest extends TestCase
 
         $run = new Exercise('Run', ExerciseType::Cardio);
         $squat = new Exercise('Squat', ExerciseType::Strength);
+        $this->setId($run, 1);
+        $this->setId($squat, 2);
 
         $secondEntry = new WorkoutEntry($session, $squat, 2);
         $this->setId($secondEntry, 22);
@@ -338,6 +340,7 @@ final class WorkoutSessionControllerTest extends TestCase
                 'entries' => [
                     [
                         'id' => 11,
+                        'exerciseId' => 1,
                         'exerciseName' => 'Run',
                         'type' => 'cardio',
                         'typeLabel' => 'Cardio',
@@ -357,6 +360,7 @@ final class WorkoutSessionControllerTest extends TestCase
                     ],
                     [
                         'id' => 22,
+                        'exerciseId' => 2,
                         'exerciseName' => 'Squat',
                         'type' => 'strength',
                         'typeLabel' => 'Fuerza',
@@ -399,6 +403,191 @@ final class WorkoutSessionControllerTest extends TestCase
         $configure($set);
 
         return $set;
+    }
+
+    public function testUpdateEntryReturnsNotFoundWhenSessionDoesNotExist(): void
+    {
+        $this->workoutSessionRepository->method('find')->with(99)->willReturn(null);
+
+        $response = $this->controller->updateEntry(99, 1, $this->jsonRequest([
+            'exerciseId' => 5,
+            'notes' => null,
+            'sets' => [['setNumber' => 1, 'weightKg' => 40, 'reps' => 12]],
+        ]));
+
+        self::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        self::assertSame(['message' => 'Sesión no encontrada.'], $this->decode($response));
+    }
+
+    public function testUpdateEntryReturnsNotFoundWhenEntryDoesNotBelongToSession(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $foreignSession = new WorkoutSession(new \DateTimeImmutable('2026-05-20'), null);
+        $this->setId($foreignSession, 9);
+        $foreignEntry = new WorkoutEntry($foreignSession, new Exercise('Squat', \App\Entity\ExerciseType::Strength), 1);
+        $this->setId($foreignEntry, 11);
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($foreignEntry);
+
+        $response = $this->controller->updateEntry(5, 11, $this->jsonRequest([
+            'exerciseId' => 1,
+            'notes' => null,
+            'sets' => [['setNumber' => 1, 'weightKg' => 40, 'reps' => 12]],
+        ]));
+
+        self::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        self::assertSame(['message' => 'Ejercicio de sesión no encontrado.'], $this->decode($response));
+    }
+
+    public function testUpdateEntryReturnsBadRequestWhenBodyIsNotJsonObject(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $squat = new Exercise('Squat', \App\Entity\ExerciseType::Strength);
+        $this->setId($squat, 7);
+
+        $entry = new WorkoutEntry($session, $squat, 1);
+        $this->setId($entry, 11);
+        $entry->addWorkoutSet($this->workoutSet($entry, 1, static fn (WorkoutSet $set) => $set->setWeightKg(40.0)->setReps(12)));
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($entry);
+        $this->exerciseRepository->method('find')->with(7)->willReturn($squat);
+
+        $response = $this->controller->updateEntry(5, 11, new Request([], [], [], [], [], ['CONTENT_TYPE' => 'application/json'], '{invalid'));
+
+        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertSame(['message' => 'El cuerpo de la petición no es válido.'], $this->decode($response));
+    }
+
+    public function testUpdateEntryReturnsNotFoundWhenExerciseDoesNotMatchEntry(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $squat = new Exercise('Squat', \App\Entity\ExerciseType::Strength);
+        $this->setId($squat, 7);
+
+        $otherExercise = new Exercise('Deadlift', \App\Entity\ExerciseType::Strength);
+        $this->setId($otherExercise, 99);
+
+        $entry = new WorkoutEntry($session, $squat, 1);
+        $this->setId($entry, 11);
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($entry);
+        $this->exerciseRepository->method('find')->with(99)->willReturn($otherExercise);
+
+        $response = $this->controller->updateEntry(5, 11, $this->jsonRequest([
+            'exerciseId' => 99,
+            'notes' => 'Updated',
+            'sets' => [['setNumber' => 1, 'weightKg' => 40, 'reps' => 12]],
+        ]));
+
+        self::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        self::assertSame(['message' => 'Ejercicio no encontrado.'], $this->decode($response));
+    }
+
+    public function testUpdateEntryReturnsValidationErrorsWhenSetsAreEmpty(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $squat = new Exercise('Squat', \App\Entity\ExerciseType::Strength);
+        $this->setId($squat, 7);
+
+        $entry = new WorkoutEntry($session, $squat, 1);
+        $this->setId($entry, 11);
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($entry);
+        $this->exerciseRepository->method('find')->with(7)->willReturn($squat);
+
+        $response = $this->controller->updateEntry(5, 11, $this->jsonRequest([
+            'exerciseId' => 7,
+            'notes' => null,
+            'sets' => [],
+        ]));
+
+        self::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        self::assertSame([
+            'message' => 'Hay errores de validación.',
+            'errors' => ['sets' => 'Debes añadir al menos una serie.'],
+        ], $this->decode($response));
+    }
+
+    public function testUpdateEntryReplacesSetsAndUpdatesNotes(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $squat = new Exercise('Squat', \App\Entity\ExerciseType::Strength);
+        $this->setId($squat, 7);
+
+        $entry = new WorkoutEntry($session, $squat, 1);
+        $this->setId($entry, 11);
+        $entry->setNotes('Old notes');
+        $entry->addWorkoutSet($this->workoutSet($entry, 1, static fn (WorkoutSet $set) => $set->setWeightKg(40.0)->setReps(12)));
+        $entry->addWorkoutSet($this->workoutSet($entry, 2, static fn (WorkoutSet $set) => $set->setWeightKg(45.0)->setReps(10)));
+        $session->addWorkoutEntry($entry);
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($entry);
+        $this->exerciseRepository->method('find')->with(7)->willReturn($squat);
+
+        $this->entityManager->expects($this->once())->method('flush');
+
+        $response = $this->controller->updateEntry(5, 11, $this->jsonRequest([
+            'exerciseId' => 7,
+            'notes' => 'New notes',
+            'sets' => [
+                ['setNumber' => 1, 'weightKg' => 50, 'reps' => 8, 'notes' => 'Top set'],
+                ['setNumber' => 2, 'weightKg' => 45, 'reps' => 10],
+            ],
+        ]));
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $serializedEntry = $this->decode($response)['item']['entries'][0];
+        self::assertSame('New notes', $serializedEntry['notes']);
+        self::assertCount(2, $serializedEntry['sets']);
+        self::assertEquals(50.0, $serializedEntry['sets'][0]['weightKg']);
+        self::assertSame(8, $serializedEntry['sets'][0]['reps']);
+        self::assertSame('Top set', $serializedEntry['sets'][0]['notes']);
+        self::assertEquals(45.0, $serializedEntry['sets'][1]['weightKg']);
+        self::assertSame(10, $serializedEntry['sets'][1]['reps']);
+    }
+
+    public function testUpdateEntryNormalizesBlankNotesToNull(): void
+    {
+        $session = new WorkoutSession(new \DateTimeImmutable('2026-05-26'), 'Leg day');
+        $this->setId($session, 5);
+
+        $squat = new Exercise('Squat', \App\Entity\ExerciseType::Strength);
+        $this->setId($squat, 7);
+
+        $entry = new WorkoutEntry($session, $squat, 1);
+        $this->setId($entry, 11);
+        $entry->setNotes('Old notes');
+        $entry->addWorkoutSet($this->workoutSet($entry, 1, static fn (WorkoutSet $set) => $set->setWeightKg(40.0)->setReps(12)));
+        $session->addWorkoutEntry($entry);
+
+        $this->workoutSessionRepository->method('find')->with(5)->willReturn($session);
+        $this->workoutEntryRepository->method('find')->with(11)->willReturn($entry);
+        $this->exerciseRepository->method('find')->with(7)->willReturn($squat);
+
+        $response = $this->controller->updateEntry(5, 11, $this->jsonRequest([
+            'exerciseId' => 7,
+            'notes' => '   ',
+            'sets' => [['setNumber' => 1, 'weightKg' => 40, 'reps' => 12]],
+        ]));
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertNull($this->decode($response)['item']['entries'][0]['notes']);
     }
 
     private function jsonRequest(array $payload): Request

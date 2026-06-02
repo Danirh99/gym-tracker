@@ -151,6 +151,112 @@ html.dark {
     cursor: pointer;
   }
 
+  .app-boot-splash {
+    position: fixed;
+    inset: 0;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+    overflow: hidden;
+    padding: 32px;
+    background:
+      radial-gradient(circle at 50% 34%, rgb(45 212 191 / 0.28), transparent 34%),
+      linear-gradient(145deg, #0f172a 0%, #111827 52%, #042f2e 100%);
+    color: #f8fafc;
+    font-family: "Hanken Grotesk", sans-serif;
+  }
+
+  .app-boot-splash::before {
+    position: absolute;
+    inset: -20%;
+    z-index: -2;
+    content: "";
+    background-image:
+      linear-gradient(rgb(148 163 184 / 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(148 163 184 / 0.09) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at center, black, transparent 68%);
+  }
+
+  .app-boot-splash__halo {
+    position: absolute;
+    width: min(72vw, 420px);
+    aspect-ratio: 1;
+    z-index: -1;
+    border: 1px solid rgb(94 234 212 / 0.28);
+    border-radius: 999px;
+    box-shadow:
+      0 0 80px rgb(20 184 166 / 0.2),
+      inset 0 0 72px rgb(147 197 253 / 0.1);
+    animation: boot-halo 1600ms cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+  }
+
+  .app-boot-splash__card {
+    display: grid;
+    justify-items: center;
+    width: min(100%, 360px);
+    padding: 36px 28px 32px;
+    border: 1px solid rgb(203 213 225 / 0.16);
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgb(15 23 42 / 0.72), rgb(15 23 42 / 0.46));
+    box-shadow: 0 28px 96px rgb(2 6 23 / 0.42);
+    text-align: center;
+    backdrop-filter: blur(20px);
+    animation: boot-card-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .app-boot-splash__logo {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 22px;
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgb(45 212 191 / 0.28);
+  }
+
+  .app-boot-splash__eyebrow {
+    margin: 0 0 8px;
+    color: #5eead4;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .app-boot-splash h1 {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(32px, 10vw, 48px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+
+  .app-boot-splash__copy {
+    margin: 14px 0 24px;
+    color: #cbd5e1;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .app-boot-splash__loader {
+    width: 112px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(148 163 184 / 0.24);
+  }
+
+  .app-boot-splash__loader::after {
+    display: block;
+    width: 44px;
+    height: 100%;
+    border-radius: inherit;
+    content: "";
+    background: linear-gradient(90deg, #2dd4bf, #93c5fd);
+    animation: boot-loader 900ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
   html.theme-transition,
   html.theme-transition *,
   html.theme-transition *::before,
@@ -170,7 +276,7 @@ html.dark {
 
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: none;
     }
   }
 
@@ -217,6 +323,40 @@ html.dark {
   @keyframes spin-soft {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  @keyframes boot-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.98);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes boot-halo {
+    from {
+      opacity: 0.68;
+      transform: scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+  }
+
+  @keyframes boot-loader {
+    from {
+      transform: translateX(-48px);
+    }
+
+    to {
+      transform: translateX(116px);
     }
   }
 
@@ -276,7 +416,10 @@ html.dark {
     .animate-list-enter,
     .animate-toast-enter,
     .animate-dock-enter,
-    .animate-spin-soft {
+    .animate-spin-soft,
+    .app-boot-splash__card,
+    .app-boot-splash__halo,
+    .app-boot-splash__loader::after {
       animation: none;
     }
   }

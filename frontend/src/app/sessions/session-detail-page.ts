@@ -157,6 +157,21 @@ export class SessionDetailPage implements OnInit {
     void this.router.navigate(this.routeForExerciseType(type));
   }
 
+  routeForEditEntry(entry: WorkoutEntry): (string | number)[] {
+    // Construye la ruta de edicion para una entrada concreta segun su tipo.
+    const sessionId = this.session?.id ?? Number(this.route.snapshot.paramMap.get('id'));
+    return ['/sessions', sessionId, 'exercises', entry.id, 'edit', entry.type];
+  }
+
+  openEditEntry(entry: WorkoutEntry): void {
+    // Bloquea el acceso a la edicion mientras hay un borrado en curso.
+    if (this.isDeletingEntry) {
+      return;
+    }
+
+    void this.router.navigate(this.routeForEditEntry(entry));
+  }
+
   openDeleteDialog(entry: WorkoutEntry): void {
     // Prepara la entrada para borrado.
     if (this.isDeletingEntry) {
