@@ -130,11 +130,10 @@ describe('ChartsPage', () => {
     fixture.detectChanges();
     component.selectType('cardio');
 
-    expect(component.weeklySessionCount()).toBe(2);
-    expect(component.periodSessionsCount()).toBe(2);
-    expect(component.periodCardioMinutes()).toBe(15);
-    expect(component.periodDistanceKm()).toBeCloseTo(4.0, 5);
-    expect(component.periodVolumeKg()).toBe(0);
+    expect(component.weeklySessionCountValue).toBe(2);
+    expect(component.periodSessionsCountValue).toBe(2);
+    expect(component.selectedTypeTotalLabelValue).toBe('15 min');
+    expect(component.selectedTypeStatCardsValue[1].value).toBe('4,0 km');
   });
 
   it('returns chart paths with loaded data', () => {
@@ -142,8 +141,8 @@ describe('ChartsPage', () => {
 
     fixture.detectChanges();
 
-    const linePath = component.volumePath();
-    const areaPath = component.volumeAreaPath();
+    const linePath = component.typePathValue;
+    const areaPath = component.typeAreaPathValue;
 
     expect(linePath).toContain('M');
     expect(linePath).toContain('L');
@@ -168,7 +167,7 @@ describe('ChartsPage', () => {
     component.selectPeriod('week');
     component.selectType('cardio');
 
-    expect(component.volumeTrendPercent()).toBe(167);
-    expect(component.recordMessage()).toContain('Nuevo pico');
+    expect(component.typeTrendPercentValue).toBe(167);
+    expect(component.recordMessageValue).toContain('Nuevo pico');
   });
 });
