@@ -1,9 +1,11 @@
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Exercise } from '../../exercises/exercise.model';
 
 @Component({
   selector: 'app-exercise-selector',
   standalone: true,
+  imports: [NgClass],
   templateUrl: './exercise-selector.component.html',
 })
 export class ExerciseSelectorComponent {
@@ -14,6 +16,10 @@ export class ExerciseSelectorComponent {
   @Input() emptyMessage = 'No hay ejercicios que coincidan con la búsqueda.';
 
   @Input() compactMeta = false;
+
+  @Input() variant: 'card' | 'compact' = 'card';
+
+  @Input() scrollable = false;
 
   @Output() exerciseSelected = new EventEmitter<Exercise>();
 

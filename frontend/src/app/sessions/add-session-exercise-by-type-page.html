@@ -14,7 +14,7 @@
     <app-theme-toggle-button />
   </header>
 
-  <main class="mx-auto mt-md flex w-full max-w-3xl flex-col gap-md px-margin-mobile pb-8 md:px-margin-desktop">
+  <main class="mx-auto mt-md flex w-full max-w-5xl flex-col gap-md px-margin-mobile pb-8 md:px-margin-desktop">
     @if (isLoading) {
     <section class="rounded-2xl bg-surface-container-lowest p-md shadow-sm">
       <div class="h-12 animate-pulse rounded-xl bg-surface-container-high"></div>
@@ -24,55 +24,61 @@
       {{ errorMessage }}
     </section>
     } @else {
-    <section class="relative">
-      <label class="sr-only" for="exercise-search">Buscar ejercicio</label>
-      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-      <input id="exercise-search"
-        class="w-full rounded-xl border-2 border-outline-variant/40 bg-surface-container-low py-4 pl-12 pr-4 font-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container focus:outline-none"
-        [(ngModel)]="searchTerm" placeholder="Buscar ejercicio..." type="search" />
-    </section>
+    <div class="grid min-w-0 gap-md lg:grid-cols-[minmax(280px,380px)_1fr] lg:items-start">
+      <section class="min-w-0 space-y-md rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-md shadow-sm lg:sticky lg:top-24">
+        <div class="flex items-end justify-between gap-sm">
+          <h2 class="font-headline-md text-headline-md text-on-surface">Selecciona ejercicio</h2>
+          <span class="shrink-0 font-label-sm text-label-sm text-on-surface-variant">{{ visibleExercises().length }} resultados</span>
+        </div>
 
-    <section class="space-y-md">
-      <h2 class="font-headline-md text-headline-md text-on-surface">Selecciona ejercicio</h2>
-      <app-exercise-selector [exercises]="visibleExercises()" [selectedExerciseId]="selectedExerciseId"
-        [emptyMessage]="'No hay ejercicios de este tipo que coincidan con la búsqueda.'" [compactMeta]="true"
-        (exerciseSelected)="selectExercise($event)" />
-    </section>
+        <div class="relative">
+          <label class="sr-only" for="exercise-search">Buscar ejercicio</label>
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+          <input id="exercise-search"
+            class="w-full rounded-xl border-2 border-outline-variant/40 bg-surface-container-low py-3 pl-12 pr-4 font-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary-container focus:bg-surface-container focus:outline-none"
+            [(ngModel)]="searchTerm" placeholder="Buscar ejercicio..." type="search" />
+        </div>
 
-    <section class="space-y-md">
-      <div class="flex items-end justify-between">
-        <h2 class="font-headline-md text-headline-md text-on-surface">{{ presentation().title }}</h2>
-        <span class="font-label-md text-primary">Histórico: {{ selectedExerciseHistory ?? 'Sin registros' }}</span>
-      </div>
+        <app-exercise-selector [exercises]="visibleExercises()" [selectedExerciseId]="selectedExerciseId"
+          [emptyMessage]="'No hay ejercicios de este tipo que coincidan con la búsqueda.'" [compactMeta]="true"
+          [scrollable]="true" variant="compact" (exerciseSelected)="selectExercise($event)" />
+      </section>
 
-      @if (type === 'cardio') {
-      <app-cardio-sets-table [sets]="cardioSets" (removeRequested)="openRemoveSetDialog($event)" />
-      } @else {
-      <app-core-other-sets-table [sets]="coreOtherSets" (removeRequested)="openRemoveSetDialog($event)" />
-      }
+      <section class="min-w-0 space-y-md">
+        <div class="flex flex-wrap items-end justify-between gap-sm">
+          <h2 class="font-headline-md text-headline-md text-on-surface">{{ presentation().title }}</h2>
+          <span class="font-label-md text-primary">Histórico: {{ selectedExerciseHistory ?? 'Sin registros' }}</span>
+        </div>
 
-      <div class="mt-4">
-        <label class="mb-xs block font-label-md text-label-md text-on-surface-variant" for="entry-notes">Notas del
-          ejercicio</label>
-        <textarea id="entry-notes"
-          class="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md"
-          [(ngModel)]="notes" placeholder="Notas opcionales" rows="3"></textarea>
-      </div>
-    </section>
+        @if (type === 'cardio') {
+        <app-cardio-sets-table [sets]="cardioSets" (removeRequested)="openRemoveSetDialog($event)" />
+        } @else {
+        <app-core-other-sets-table [sets]="coreOtherSets" (removeRequested)="openRemoveSetDialog($event)" />
+        }
+
+        <div class="mt-4">
+          <label class="mb-xs block font-label-md text-label-md text-on-surface-variant" for="entry-notes">Notas del
+            ejercicio</label>
+          <textarea id="entry-notes"
+            class="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md"
+            [(ngModel)]="notes" placeholder="Notas opcionales" rows="3"></textarea>
+        </div>
+      </section>
+    </div>
     }
   </main>
 
   <div
     class="fixed bottom-0 left-0 z-50 w-full border-t border-surface-container-high bg-surface/90 p-md backdrop-blur-lg">
-    <div class="mx-auto flex w-full max-w-3xl gap-md">
+    <div class="mx-auto flex w-full max-w-3xl gap-sm">
       <button
-        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-secondary px-6 py-4 font-headline-md text-body-lg text-secondary transition-all hover:bg-secondary/5 active:scale-95"
+        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-secondary px-4 py-3 font-headline-md text-body-md text-secondary transition-all hover:bg-secondary/5 active:scale-95 md:px-6"
         (click)="addSet()" type="button">
-        <span class="material-symbols-outlined">add</span>
+        <span class="material-symbols-outlined text-[22px]">add</span>
         <span>Serie</span>
       </button>
       <button
-        class="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-primary-container px-6 py-4 font-headline-md text-body-lg text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+        class="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-primary-container px-4 py-3 font-headline-md text-body-md text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 md:px-6"
         [disabled]="!canSave() || isSaving || isLoading" (click)="save()" type="button">
         @if (isSaving) {
         <span
@@ -80,7 +86,7 @@
           aria-hidden="true"></span>
         <span>Guardando...</span>
         } @else {
-        <span class="material-symbols-outlined filled-icon">save</span>
+        <span class="material-symbols-outlined filled-icon text-[22px]">save</span>
         <span>{{ presentation().saveLabel }}</span>
         }
       </button>

@@ -195,16 +195,18 @@
       }
       }
 
-      <button
-        class="flex w-full items-center justify-center gap-xs rounded-[24px] border-2 border-dashed border-outline-variant py-md font-label-md text-label-md text-outline transition-all hover:bg-surface-variant/20 active:scale-[0.98]"
-        (click)="openExerciseTypeModal()" type="button">
-        <span class="material-symbols-outlined" aria-hidden="true">add</span>
-        Añadir ejercicio
-      </button>
     </section>
     }
   </main>
   </div>
+
+  <button
+    class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] active:scale-95 md:bottom-8 md:right-8"
+    (click)="openExerciseTypeModal()"
+    aria-label="Añadir ejercicio"
+    type="button">
+    <span class="material-symbols-outlined text-[28px]" aria-hidden="true">add</span>
+  </button>
 
   @if (showExerciseTypeModal) {
   <app-exercise-type-modal (closed)="closeExerciseTypeModal()" (selected)="goToExerciseType($event)" />
