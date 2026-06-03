@@ -1,0 +1,93 @@
+<div class="min-h-screen overflow-hidden bg-background pt-20">
+  <header class="fixed left-0 top-0 z-40 flex w-full items-center justify-between bg-surface px-[24px] py-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+    <div class="flex items-center gap-base">
+      <a aria-label="Volver" class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-surface-container-high active:scale-90" routerLink="/">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <div>
+        <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary">Backups</h1>
+        <p class="font-label-sm text-label-sm text-on-surface-variant">Exporta e importa tus datos completos</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto grid w-full max-w-[920px] gap-[20px] px-[24px] pb-10 lg:grid-cols-[1.05fr_0.95fr]">
+    <section class="relative overflow-hidden rounded-[28px] border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
+      <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary/10 blur-2xl"></div>
+      <div class="relative">
+        <div class="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-container text-on-primary-container shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
+          <span class="material-symbols-outlined text-[30px]">cloud_download</span>
+        </div>
+        <p class="mb-2 font-label-md text-label-md uppercase tracking-[0.18em] text-primary">Salida segura</p>
+        <h2 class="font-headline-md text-headline-md text-on-surface">Exportar todo el historial</h2>
+        <p class="mt-3 text-on-surface-variant">Genera un JSON versionado con ejercicios, entrenamientos, entradas y series. Incluye ejercicios inactivos para conservar referencias historicas.</p>
+
+        <button
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 font-label-md text-label-md text-on-primary shadow-[0_12px_28px_rgba(0,0,0,0.16)] transition-transform active:scale-95 disabled:opacity-50"
+          [disabled]="isExporting"
+          (click)="exportBackup()"
+          type="button">
+          <span class="material-symbols-outlined text-[20px]">download</span>
+          {{ isExporting ? 'Exportando...' : 'Exportar backup' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-[24px] shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
+      <div class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary-container text-on-secondary-container">
+        <span class="material-symbols-outlined text-[30px]">upgrade</span>
+      </div>
+      <p class="mb-2 font-label-md text-label-md uppercase tracking-[0.18em] text-secondary">Restauracion merge</p>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Importar sin borrar datos</h2>
+      <p class="mt-3 text-on-surface-variant">La importacion fusiona: reutiliza ejercicios existentes, crea los que falten y evita duplicar entrenamientos identicos.</p>
+
+      <label class="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline-variant bg-surface-container-low p-6 text-center transition-colors hover:bg-surface-container">
+        <span class="material-symbols-outlined mb-2 text-[32px] text-primary">upload_file</span>
+        <span class="font-label-md text-label-md text-on-surface">{{ selectedFileName ?? 'Seleccionar backup JSON' }}</span>
+        <span class="mt-1 text-sm text-on-surface-variant">Archivo .json exportado desde Gym Tracker</span>
+        <input class="sr-only" accept="application/json,.json" type="file" (change)="onFileSelected($event)" />
+      </label>
+
+      <button
+        class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondary px-5 py-3 font-label-md text-label-md text-on-secondary transition-transform active:scale-95 disabled:opacity-50"
+        [disabled]="isImporting || !canImport"
+        (click)="importBackup()"
+        type="button">
+        <span class="material-symbols-outlined text-[20px]">publish</span>
+        {{ isImporting ? 'Importando...' : 'Importar backup' }}
+      </button>
+    </section>
+
+    <section class="rounded-[24px] border border-outline-variant bg-surface-container-low p-[20px] lg:col-span-2">
+      <h2 class="font-title-lg text-title-lg text-on-surface">Resumen</h2>
+      @if (summary) {
+        <div class="mt-4 grid gap-3 sm:grid-cols-4">
+          <div class="rounded-2xl bg-surface-container-lowest p-4">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Ejercicios creados</p>
+            <p class="mt-1 text-2xl font-bold text-on-surface">{{ summary.exercisesCreated }}</p>
+          </div>
+          <div class="rounded-2xl bg-surface-container-lowest p-4">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Ejercicios reutilizados</p>
+            <p class="mt-1 text-2xl font-bold text-on-surface">{{ summary.exercisesMatched }}</p>
+          </div>
+          <div class="rounded-2xl bg-surface-container-lowest p-4">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Sesiones creadas</p>
+            <p class="mt-1 text-2xl font-bold text-on-surface">{{ summary.sessionsCreated }}</p>
+          </div>
+          <div class="rounded-2xl bg-surface-container-lowest p-4">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Duplicadas omitidas</p>
+            <p class="mt-1 text-2xl font-bold text-on-surface">{{ summary.sessionsSkipped }}</p>
+          </div>
+        </div>
+      } @else {
+        <p class="mt-3 rounded-2xl bg-surface-container-lowest p-4 text-on-surface-variant">Todavia no se ha importado ningun backup en esta sesion.</p>
+      }
+
+      @if (feedbackMessage) {
+        <div class="mt-4 rounded-2xl p-4" [class]="feedbackTone === 'error' ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'">
+          {{ feedbackMessage }}
+        </div>
+      }
+    </section>
+  </main>
+</div>

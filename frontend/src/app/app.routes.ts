@@ -9,6 +9,8 @@ export const routes: Routes = [
   { path: 'calendar', loadComponent: () => import('./calendar/calendar-page').then((m) => m.CalendarPage) },
   // Centro de estado offline y sincronizacion.
   { path: 'offline', loadComponent: () => import('./offline/offline-center-page').then((m) => m.OfflineCenterPage) },
+  // Exportacion e importacion de backups.
+  { path: 'backups', loadComponent: () => import('./backups/backup-page').then((m) => m.BackupPage) },
   // Alertas y recomendaciones de entrenamiento.
   { path: 'alerts', loadComponent: () => import('./alerts/alerts-page').then((m) => m.AlertsPage) },
   // Alta de sesiones.

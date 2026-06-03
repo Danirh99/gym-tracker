@@ -1,28 +1,2 @@
-@if (!offlineStatusService.isOnline()) {
-  <div class="connectivity-banner offline">Sin conexion. Mostrando datos en cache.</div>
-} @else if (offlineSyncService.isSyncing() || offlineSyncService.lastSyncResult() === 'success') {
-  <div class="connectivity-banner online" [class.dismissing]="offlineSyncService.isSuccessDismissing()">En linea</div>
-}
-
-@if (!offlineStatusService.isOnline() || offlineQueueService.pendingCount() > 0 || offlineSyncService.isSyncing() || offlineSyncService.lastSyncResult() !== 'idle') {
-  <div class="sync-strip" [class.dismissing]="offlineSyncService.isSuccessDismissing()">
-    @if (offlineQueueService.pendingCount() > 0) {
-      <span class="sync-chip pending">Pendientes: {{ offlineQueueService.pendingCount() }}</span>
-    }
-    @if (offlineSyncService.isSyncing()) {
-      <span class="sync-chip syncing">Sincronizando...</span>
-    }
-    @if (offlineSyncService.lastSyncResult() === 'error') {
-      <span class="sync-chip error">Sync con errores</span>
-    }
-    @if (offlineSyncService.lastSyncResult() === 'success') {
-      <span class="sync-chip success" [class.dismissing]="offlineSyncService.isSuccessDismissing()">Sync OK</span>
-    }
-    @if (offlineQueueService.pendingCount() > 0 || offlineSyncService.lastSyncResult() !== 'idle' || !offlineStatusService.isOnline()) {
-      <a class="sync-link" routerLink="/offline">Ver estado</a>
-    }
-  </div>
-}
-
 <router-outlet />
 <app-side-menu />

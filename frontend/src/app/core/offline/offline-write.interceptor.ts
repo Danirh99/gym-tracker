@@ -15,6 +15,10 @@ export const offlineWriteInterceptor: HttpInterceptorFn = (request: HttpRequest<
     return next(request);
   }
 
+  if (request.url === '/api/backups/import') {
+    return next(request);
+  }
+
   if (navigator.onLine) {
     void syncService.syncPendingOperations();
     return next(request);

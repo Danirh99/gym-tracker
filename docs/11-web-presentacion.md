@@ -15,13 +15,15 @@ Crear una landing/web de proyecto que responda rapidamente a estas preguntas:
 3. Que problemas resuelve en el gimnasio.
 4. Que funcionalidades incluye.
 5. Como se ve la app real.
-6. Como se puede instalar, probar o contribuir.
+6. Como protege y permite mover los datos mediante backups.
+7. Como se puede instalar, probar o contribuir.
 
 La web debe servir para:
 
 - presentar el proyecto en GitHub, portfolio o despliegue publico,
 - explicar el alcance funcional sin entrar en implementacion excesiva,
 - mostrar que es una PWA moderna, instalable y preparada para offline,
+- explicar que el historial puede exportarse e importarse sin borrado destructivo,
 - destacar que es software libre bajo licencia MIT,
 - facilitar contribuciones y revision del codigo.
 
@@ -37,6 +39,7 @@ Variantes utiles para copy:
 - Tu diario de gimnasio, instalable como PWA y abierto para la comunidad.
 - Un tracker open source para fuerza, cardio, abdomen y cualquier ejercicio libre.
 - Sin redes sociales, sin ruido, sin friccion: solo entrenamiento y progreso.
+- Exporta tu historial, restaura en modo merge y conserva tus entrenamientos.
 
 ---
 
@@ -59,6 +62,7 @@ La propuesta del producto no es competir como red social fitness. Su foco es mas
 - adaptar los campos al tipo de ejercicio,
 - consultar progreso por ejercicio,
 - detectar constancia, volumen y sesiones recientes,
+- exportar e importar ejercicios y entrenamientos completos,
 - funcionar bien en movil,
 - preparar una experiencia fiable incluso sin conexion.
 
@@ -78,6 +82,7 @@ Persona que entrena en gimnasio y quiere registrar:
 - notas,
 - progreso semanal,
 - historial por ejercicio.
+- backup portable de sus datos.
 
 Necesita rapidez y claridad. No quiere perder tiempo configurando rutinas complejas.
 
@@ -103,6 +108,7 @@ Direccion recomendada: **precision deportiva con estetica tecnica**.
 
 - Fondos oscuros o superficies neutras con acentos turquesa/azul.
 - Tarjetas con datos reales: sesiones, volumen, racha, PR, cola offline.
+- Paneles de confianza: backup JSON, merge seguro, sesiones duplicadas omitidas.
 - Composicion con mockups de movil y paneles analiticos.
 - Tipografia de titulares compacta y contundente.
 - Lenguaje visual de progreso: lineas, barras, calendario, chips, estados.
@@ -122,6 +128,7 @@ Principio: la interfaz real debe ser la protagonista.
 ├── Funcionalidades principales
 ├── Flujo de entrenamiento
 ├── Pantallas de la app
+├── Backups export/import
 ├── Analitica y progreso
 ├── PWA y modo offline
 ├── Arquitectura open source
@@ -135,7 +142,7 @@ Principio: la interfaz real debe ser la protagonista.
 
 ```txt
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ Gym Tracker              Funciones   Pantallas   Offline   Open Source    │
+│ Gym Tracker          Funciones   Pantallas   Backups   Offline   Open Source │
 │                                                                  GitHub → │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -150,6 +157,7 @@ En movil:
 ┌────────────────────────────────────┐
 │ Funciones                          │
 │ Pantallas                          │
+│ Backups                            │
 │ Offline                            │
 │ Open Source                        │
 │ GitHub                             │
@@ -168,7 +176,7 @@ Los siguientes wireframes representan secciones de la web publica, no pantallas 
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│ Gym Tracker                 Funciones  Flujo  Pantallas  Offline  Open Source      GitHub → │
+│ Gym Tracker             Funciones  Flujo  Pantallas  Backups  Offline  Open Source  GitHub → │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                              │
 │  ┌──────────────────────────────────────────────┐    ┌────────────────────────────────────┐  │
@@ -197,12 +205,13 @@ Los siguientes wireframes representan secciones de la web publica, no pantallas 
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐ │
 │  │ Sesiones     │ │ Ejercicios   │ │ Calendario   │ │ Graficas     │ │ Offline + sync   │ │
 │  │ fecha/mood   │ │ 4 tipos      │ │ dias activos │ │ volumen/PR   │ │ cola operaciones │ │
+│  │ Backups      │ │ JSON merge   │ │ portable     │ │ no destruct. │ │ resumen import.  │ │
 │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘ └──────────────────┘ │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │  Flujo: crear sesion → añadir ejercicio → registrar series → consultar progreso              │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │  Galeria de pantallas                                                                         │
-│  [Dashboard] [Sesion] [Ejercicios] [Detalle ejercicio] [Calendario] [Graficas] [Offline]     │
+│  [Dashboard] [Sesion] [Ejercicios] [Detalle ejercicio] [Calendario] [Backups] [Offline]      │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │  Open source listo para colaborar                                                            │
 │  MIT · CONTRIBUTING · CODE_OF_CONDUCT · SECURITY · Issues/PR templates · CI base             │
@@ -336,10 +345,16 @@ Copy sugerido:
 │  └──────────────────────────┘ └──────────────────────────┘ └─────────────────────────────┘  │
 │                                                                                              │
 │  ┌──────────────────────────┐ ┌──────────────────────────┐ ┌─────────────────────────────┐  │
-│  │ Alertas                  │ │ PWA offline              │ │ Tema y navegacion movil    │  │
-│  │ racha, desbalance,       │ │ cache, cola, sync,       │ │ bottom nav, menu lateral,  │  │
-│  │ ejercicios sin uso       │ │ reintento y descarte     │ │ claro/oscuro               │  │
+│  │ Alertas                  │ │ PWA offline              │ │ Backups                   │  │
+│  │ racha, desbalance,       │ │ cache, cola, sync,       │ │ export/import JSON,       │  │
+│  │ ejercicios sin uso       │ │ reintento y descarte     │ │ merge sin borrado         │  │
 │  └──────────────────────────┘ └──────────────────────────┘ └─────────────────────────────┘  │
+│                                                                                              │
+│  ┌──────────────────────────┐                                                                 │
+│  │ Tema y navegacion movil  │                                                                 │
+│  │ bottom nav, menu lateral,│                                                                 │
+│  │ claro/oscuro             │                                                                 │
+│  └──────────────────────────┘                                                                 │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -395,7 +410,7 @@ La web debe usar capturas reales cuando existan. Mientras tanto, estos wireframe
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │  Pantallas reales de la PWA                                                                   │
 │                                                                                              │
-│  [Dashboard] [Sesion] [Ejercicios] [Progreso] [Calendario] [Graficas] [Offline]              │
+│  [Dashboard] [Sesion] [Ejercicios] [Progreso] [Calendario] [Backups] [Offline]               │
 │                                                                                              │
 │  ┌────────────────────────────┐  ┌────────────────────────────────────────────────────────┐  │
 │  │ ┌────────────────────────┐ │  │ Dashboard                                             │  │
@@ -783,7 +798,39 @@ La web debe usar capturas reales cuando existan. Mientras tanto, estos wireframe
 
 ---
 
-## 20. Pantalla destacada: offline y sincronizacion
+## 20. Pantalla destacada: backups
+
+```txt
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  Backups portables sin borrado destructivo                                                    │
+│                                                                                              │
+│  ┌──────────────────────────────┐   ┌─────────────────────────────────────────────────────┐  │
+│  │ ← Backups               JSON │   │ Confianza de datos                                  │  │
+│  ├──────────────────────────────┤   │                                                     │  │
+│  │ Exportar todo el historial   │   │ El usuario puede descargar un archivo JSON          │  │
+│  │ gym-tracker-backup-2026...   │   │ versionado con ejercicios, sesiones, entradas       │  │
+│  │ [Exportar backup]            │   │ y series.                                           │  │
+│  │                              │   │                                                     │  │
+│  │ Importar sin borrar datos    │   │ La importacion es merge: reutiliza ejercicios        │  │
+│  │ ┌──────────────────────────┐ │   │ existentes por nombre/tipo, crea los que faltan      │  │
+│  │ │ backup.json              │ │   │ y omite entrenamientos duplicados.                  │  │
+│  │ └──────────────────────────┘ │   │                                                     │  │
+│  │ [Importar backup]            │   │ Funcionalidades visibles:                           │  │
+│  │                              │   │ - exportacion JSON versionada                       │  │
+│  │ Resumen                      │   │ - importacion no destructiva                         │  │
+│  │ Creados 2 · Reutilizados 4   │   │ - validacion de schema                              │  │
+│  │ Omitidos 0                   │   │ - resumen posterior                                 │  │
+│  └──────────────────────────────┘   └─────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+Copy sugerido:
+
+> Exporta tu historial completo y restáuralo cuando lo necesites. Gym Tracker importa en modo merge para proteger los datos existentes y evitar duplicados.
+
+---
+
+## 21. Pantalla destacada: offline y sincronizacion
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -810,7 +857,7 @@ La web debe usar capturas reales cuando existan. Mientras tanto, estos wireframe
 
 ---
 
-## 21. Arquitectura tecnica
+## 22. Arquitectura tecnica
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -826,6 +873,7 @@ La web debe usar capturas reales cuando existan. Mientras tanto, estos wireframe
 │  │ ├─ calendar                        │      │ Migrations                                 │  │
 │  │ ├─ charts                          │      │                                            │  │
 │  │ ├─ alerts                          │      │                                            │  │
+│  │ ├─ backups                         │      │                                            │  │
 │  │ ├─ offline                         │      │                                            │  │
 │  │ ├─ shared                          │      │                                            │  │
 │  │ └─ core                            │      │                                            │  │
@@ -841,7 +889,7 @@ Copy sugerido:
 
 ---
 
-## 22. Seccion API y stack
+## 23. Seccion API y stack
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -865,7 +913,7 @@ Copy sugerido:
 
 ---
 
-## 23. Seccion contribucion
+## 24. Seccion contribucion
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -883,7 +931,7 @@ Copy sugerido:
 
 ---
 
-## 24. CTA final
+## 25. CTA final
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -936,6 +984,10 @@ Badges:
 
 > Consulta la mejor marca, la ultima sesion, la evolucion y una recomendacion sencilla para la siguiente vez que repitas un ejercicio.
 
+## Backups
+
+> Exporta ejercicios y entrenamientos a un JSON versionado. La importacion funciona en modo merge para reutilizar coincidencias, crear lo que falta y evitar sesiones duplicadas.
+
 ## Offline
 
 > Si la conexion falla, la interfaz lo muestra. Las operaciones pendientes quedan visibles en un centro offline con sincronizacion, reintento y descarte.
@@ -961,6 +1013,7 @@ Badges:
 | Calendario | `calendar/calendar-page.html` | constancia mensual y detalle diario |
 | Graficas | `charts/charts-page.html` | barras, curva, tarjetas y record |
 | Alertas | `alerts/alerts-page.html` | reglas accionables por severidad |
+| Backups | `backups/backup-page.html` | export/import JSON, merge seguro y resumen de importacion |
 | Offline | `offline/offline-center-page.html`, `app.html` | estado, cola y banners de sincronizacion |
 | Navegacion | `shared/bottom-nav.component.html`, `shared/side-menu.component.ts` | PWA mobile-first, menu, tema |
 
@@ -980,7 +1033,9 @@ La web de presentacion puede incluir una seccion pequena de "detalles cuidados" 
 - menu lateral,
 - banner offline,
 - contador de operaciones pendientes,
-- sync OK/error.
+- sync OK/error,
+- backup JSON seleccionado,
+- resumen de importacion merge.
 
 Wireframe:
 
@@ -1015,6 +1070,7 @@ Wireframe:
 - `FeatureGrid`
 - `TrainingFlowSection`
 - `ScreenShowcase`
+- `BackupSection`
 - `OfflineSection`
 - `ArchitectureSection`
 - `ContributionSection`
@@ -1044,13 +1100,14 @@ Wireframe:
 - [ ] Enlace a `README.md` o documentacion desplegada.
 - [ ] Mencion clara de licencia MIT.
 - [ ] Stack visible: Angular, Symfony, PostgreSQL, Docker, PWA.
-- [ ] Capturas o mockups de dashboard, sesion, ejercicios, progreso, calendario, graficas y offline.
+- [ ] Capturas o mockups de dashboard, sesion, ejercicios, progreso, calendario, graficas, backups y offline.
 - [ ] CTA principal: ver repositorio.
 - [ ] CTA secundario: explorar documentacion.
 - [ ] Seccion de contribucion.
 - [ ] Seccion de arquitectura.
 - [ ] Copy que explique que no es una red social fitness.
 - [ ] Copy que destaque registro rapido y campos por tipo.
+- [ ] Seccion de backups con export/import JSON y merge seguro.
 - [ ] Seccion offline con cola y sincronizacion.
 - [ ] Responsive movil.
 
@@ -1063,7 +1120,7 @@ La web de presentacion debe contar una historia simple:
 ```txt
 Problema: registrar entrenamientos suele ser lento o disperso.
 Solucion: una PWA simple para registrar fuerza, cardio, abdomen y otros ejercicios.
-Diferencial: progreso por ejercicio, calendario, graficas, alertas y modo offline visible.
+Diferencial: progreso por ejercicio, calendario, graficas, alertas, backups y modo offline visible.
 Confianza: proyecto open source, MIT, stack moderno, documentacion y CI base.
 Accion: ver GitHub, leer docs y contribuir.
 ```

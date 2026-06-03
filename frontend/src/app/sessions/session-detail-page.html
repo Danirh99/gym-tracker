@@ -1,4 +1,5 @@
-<div class="animate-page-enter min-h-screen bg-background pb-32 text-on-background selection:bg-primary-container">
+<div class="min-h-screen bg-background pb-32 text-on-background selection:bg-primary-container">
+  <div class="animate-page-enter">
   <header class="sticky top-0 z-40 flex w-full flex-col gap-xs bg-surface px-margin-mobile py-md md:px-margin-desktop">
     <div class="flex w-full items-center justify-between">
       <a aria-label="Volver al inicio" class="rounded-full p-xs transition-opacity hover:opacity-80 active:scale-95"
@@ -203,6 +204,7 @@
     </section>
     }
   </main>
+  </div>
 
   @if (showExerciseTypeModal) {
   <app-exercise-type-modal (closed)="closeExerciseTypeModal()" (selected)="goToExerciseType($event)" />
