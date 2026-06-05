@@ -41,6 +41,7 @@ describe('TypedEntryFormStore', () => {
       exerciseName: 'Cinta',
       type: 'cardio',
       typeLabel: 'Cardio',
+      muscleGroups: ['Pierna'],
       notes: 'Zona 2',
       sets: [
         { setNumber: 1, weightKg: null, reps: null, durationSeconds: 1500, distanceMeters: 2800, speedKmh: 6.7, incline: 3, resistanceLevel: null, calories: 120, notes: null },
@@ -69,6 +70,7 @@ describe('TypedEntryFormStore', () => {
       exerciseName: 'Plancha',
       type: 'core',
       typeLabel: 'Abdomen',
+      muscleGroups: ['Core'],
       notes: null,
       sets: [
         { setNumber: 1, weightKg: null, reps: 12, durationSeconds: 45, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: 'Stable' },

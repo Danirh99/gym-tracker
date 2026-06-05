@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { formatNumberEs } from '../core/utils/format.utils';
 import { ChartPeriod, ChartsAnalyticsService, VolumePoint } from './charts-analytics.service';
-import { ExerciseType, WorkoutSession } from '../sessions/session.model';
+import { WorkoutSession } from '../sessions/session.model';
 import { WorkoutSessionsFacade } from '../sessions/state/workout-sessions.facade';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 
@@ -31,32 +31,28 @@ export class ChartsPage implements OnInit {
   readonly periodButtons: Array<{ value: ChartPeriod; label: string }> = [
     { value: 'week', label: 'Semana' },
     { value: 'month', label: 'Mes' },
-    { value: 'all', label: 'Todo' },
-  ];
-
-  readonly typeButtons: Array<{ value: ExerciseType; label: string }> = [
-    { value: 'strength', label: 'Fuerza' },
-    { value: 'cardio', label: 'Cardio' },
-    { value: 'core', label: 'Core' },
-    { value: 'other', label: 'Otro' },
+    { value: 'year', label: 'Año' },
   ];
 
   selectedPeriod: ChartPeriod = 'week';
-  selectedType: ExerciseType = 'strength';
+  selectedMuscleGroup = '';
+  muscleButtons: Array<{ value: string; label: string }> = [];
   sessions: WorkoutSession[] = [];
   isLoading = true;
   errorMessage: string | null = null;
   dayMetricsValue: DayMetric[] = [];
   weeklySessionCountValue = 0;
+  periodSessionChartTitleValue = 'Sesiones por semana';
+  periodSessionCountLabelValue = '0 sesiones esta semana';
   maxDayCountValue = 1;
   periodSessionsCountValue = 0;
   typeTrendPercentValue = 0;
   typePathValue = 'M0,130 L400,130';
   typeAreaPathValue = 'M0,130 L400,130 L400,150 L0,150 Z';
-  selectedTypeTitleValue = 'Volumen de fuerza';
-  selectedTypeYAxisLabelValue = 'kg';
-  selectedTypeTotalLabelValue = '0 kg';
-  selectedTypeDescriptionValue = 'Tendencia de volumen en kg para el periodo seleccionado';
+  selectedTypeTitleValue = 'Trabajo por músculo';
+  selectedTypeYAxisLabelValue = 'series';
+  selectedTypeTotalLabelValue = '0 series';
+  selectedTypeDescriptionValue = 'Tendencia de series para el grupo muscular seleccionado';
   selectedTypeStatCardsValue: TypeStatCard[] = [];
   recordMessageValue = 'Registra tu primer entrenamiento para desbloquear récords.';
 
@@ -78,9 +74,9 @@ export class ChartsPage implements OnInit {
     this.changeDetectorRef.markForCheck();
   }
 
-  selectType(type: ExerciseType): void {
-    // Cambia el tipo de ejercicio analizado.
-    this.selectedType = type;
+  selectMuscleGroup(muscleGroup: string): void {
+    // Cambia el grupo muscular analizado.
+    this.selectedMuscleGroup = muscleGroup;
     this.recomputeChartState();
     this.changeDetectorRef.markForCheck();
   }
@@ -112,6 +108,7 @@ export class ChartsPage implements OnInit {
       .subscribe({
         next: ({ items }) => {
           this.sessions = [...items].sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
+          this.syncMuscleButtons();
           this.recomputeChartState();
           this.isLoading = false;
           this.changeDetectorRef.markForCheck();
@@ -119,6 +116,7 @@ export class ChartsPage implements OnInit {
         error: () => {
           this.errorMessage = 'No se han podido cargar los datos de las gráficas.';
           this.sessions = [];
+          this.syncMuscleButtons();
           this.recomputeChartState();
           this.isLoading = false;
           this.changeDetectorRef.markForCheck();
@@ -129,37 +127,32 @@ export class ChartsPage implements OnInit {
   private recomputeChartState(): void {
     // Agrupa todos los calculos derivados para no repetirlos durante el render.
     const dayMetrics = this.chartsAnalyticsService.dayMetrics(this.sessions, this.selectedPeriod);
-    const typePoints = this.chartsAnalyticsService.typePoints(this.sessions, this.selectedPeriod, this.selectedType);
+    const typePoints = this.chartsAnalyticsService.musclePoints(this.sessions, this.selectedPeriod, this.selectedMuscleGroup);
     const periodSessions = this.chartsAnalyticsService.sessionsInRange(this.sessions, this.selectedPeriod);
-    const periodStrengthVolumeKg = this.chartsAnalyticsService.periodStrengthVolumeKg(this.sessions, this.selectedPeriod);
-    const periodTypeSetCount = this.chartsAnalyticsService.periodTypeSetCount(this.sessions, this.selectedPeriod, this.selectedType);
-    const periodTypeDurationMinutes = this.chartsAnalyticsService.periodTypeDurationMinutes(this.sessions, this.selectedPeriod, this.selectedType);
-    const periodTypeDistanceKm = this.chartsAnalyticsService.periodTypeDistanceKm(this.sessions, this.selectedPeriod, this.selectedType);
-    const periodTypeReps = this.chartsAnalyticsService.periodTypeReps(this.sessions, this.selectedPeriod, this.selectedType);
-    const periodTypeSessionsCount = this.chartsAnalyticsService.periodTypeSessionsCount(this.sessions, this.selectedPeriod, this.selectedType);
+    const periodStrengthVolumeKg = this.chartsAnalyticsService.periodMuscleStrengthVolumeKg(this.sessions, this.selectedPeriod, this.selectedMuscleGroup);
+    const periodTypeSetCount = this.chartsAnalyticsService.periodMuscleSetCount(this.sessions, this.selectedPeriod, this.selectedMuscleGroup);
+    const periodTypeDurationMinutes = this.chartsAnalyticsService.periodMuscleDurationMinutes(this.sessions, this.selectedPeriod, this.selectedMuscleGroup);
+    const periodTypeSessionsCount = this.chartsAnalyticsService.periodMuscleSessionsCount(this.sessions, this.selectedPeriod, this.selectedMuscleGroup);
 
     this.dayMetricsValue = dayMetrics;
-    this.weeklySessionCountValue = dayMetrics.reduce((total, day) => total + day.count, 0);
+    this.weeklySessionCountValue = periodSessions.length;
+    this.periodSessionChartTitleValue = this.periodSessionChartTitle();
+    this.periodSessionCountLabelValue = this.periodSessionCountLabel(periodSessions.length);
     this.maxDayCountValue = Math.max(...dayMetrics.map((item) => item.count), 1);
     this.periodSessionsCountValue = periodSessions.length;
     this.typeTrendPercentValue = this.computeTrendPercent(typePoints);
     this.typePathValue = this.pointsToPath(typePoints);
     this.typeAreaPathValue = this.pointsToAreaPath(typePoints);
-    this.selectedTypeTitleValue = this.typeTitle(this.selectedType);
-    this.selectedTypeYAxisLabelValue = this.typeYAxisLabel(this.selectedType);
-    this.selectedTypeDescriptionValue = this.typeDescription(this.selectedType);
+    this.selectedTypeTitleValue = this.muscleTitle();
+    this.selectedTypeYAxisLabelValue = 'series';
+    this.selectedTypeDescriptionValue = this.muscleDescription();
     this.selectedTypeTotalLabelValue = this.typeTotalLabel({
-      periodStrengthVolumeKg,
       periodTypeSetCount,
-      periodTypeDurationMinutes,
-      periodTypeReps,
     });
     this.selectedTypeStatCardsValue = this.typeStatCards({
       periodStrengthVolumeKg,
       periodTypeSetCount,
       periodTypeDurationMinutes,
-      periodTypeDistanceKm,
-      periodTypeReps,
       periodTypeSessionsCount,
     });
     this.recordMessageValue = this.buildRecordMessage(periodSessions);
@@ -197,72 +190,51 @@ export class ChartsPage implements OnInit {
     return `${this.pointsToPath(points)} L400,150 L0,150 Z`;
   }
 
-  private typeTitle(type: ExerciseType): string {
-    if (type === 'strength') {
-      return 'Volumen de fuerza';
+  private muscleTitle(): string {
+    if (this.selectedMuscleGroup === '') {
+      return 'Trabajo por músculo';
     }
 
-    if (type === 'cardio') {
-      return 'Duracion de cardio';
-    }
-
-    if (type === 'core') {
-      return 'Trabajo de core';
-    }
-
-    return 'Actividad de ejercicios varios';
+    return `Trabajo de ${this.selectedMuscleGroup}`;
   }
 
-  private typeYAxisLabel(type: ExerciseType): string {
-    if (type === 'strength') {
-      return 'kg';
+  private muscleDescription(): string {
+    if (this.selectedMuscleGroup === '') {
+      return 'Crea ejercicios con grupos musculares para ver esta tendencia';
     }
 
-    if (type === 'cardio') {
-      return 'min';
-    }
-
-    if (type === 'core') {
-      return 'reps';
-    }
-
-    return 'series';
+    return `Tendencia de series registradas para ${this.selectedMuscleGroup}`;
   }
 
-  private typeDescription(type: ExerciseType): string {
-    if (type === 'strength') {
-      return 'Tendencia de volumen en kg para el periodo seleccionado';
+  private periodSessionChartTitle(): string {
+    if (this.selectedPeriod === 'month') {
+      return 'Sesiones este mes';
     }
 
-    if (type === 'cardio') {
-      return 'Tendencia de minutos de cardio por dia';
+    if (this.selectedPeriod === 'year') {
+      return 'Sesiones este año';
     }
 
-    if (type === 'core') {
-      return 'Tendencia de repeticiones de ejercicios de core';
+    return 'Sesiones por semana';
+  }
+
+  private periodSessionCountLabel(count: number): string {
+    const suffix = count === 1 ? 'sesión' : 'sesiones';
+
+    if (this.selectedPeriod === 'month') {
+      return `${count} ${suffix} este mes`;
     }
 
-    return 'Tendencia de series registradas en ejercicios de tipo otro';
+    if (this.selectedPeriod === 'year') {
+      return `${count} ${suffix} este año`;
+    }
+
+    return `${count} ${suffix} esta semana`;
   }
 
   private typeTotalLabel(metrics: {
-    periodStrengthVolumeKg: number;
     periodTypeSetCount: number;
-    periodTypeDurationMinutes: number;
-    periodTypeReps: number;
   }): string {
-    if (this.selectedType === 'strength') {
-      return `${this.formatNumber(metrics.periodStrengthVolumeKg)} kg`;
-    }
-
-    if (this.selectedType === 'cardio') {
-      return `${this.formatNumber(metrics.periodTypeDurationMinutes)} min`;
-    }
-
-    if (this.selectedType === 'core') {
-      return `${this.formatNumber(metrics.periodTypeReps)} reps`;
-    }
-
     return `${this.formatNumber(metrics.periodTypeSetCount)} series`;
   }
 
@@ -270,35 +242,23 @@ export class ChartsPage implements OnInit {
     periodStrengthVolumeKg: number;
     periodTypeSetCount: number;
     periodTypeDurationMinutes: number;
-    periodTypeDistanceKm: number;
-    periodTypeReps: number;
     periodTypeSessionsCount: number;
   }): TypeStatCard[] {
-    if (this.selectedType === 'strength') {
-      return [
-        { icon: 'fitness_center', value: `${this.formatNumber(metrics.periodStrengthVolumeKg)} kg`, label: 'volumen', tone: 'secondary' },
-        { icon: 'repeat', value: `${this.formatNumber(metrics.periodTypeSetCount)}`, label: 'series', tone: 'tertiary' },
-      ];
-    }
-
-    if (this.selectedType === 'cardio') {
-      return [
-        { icon: 'timer', value: `${this.formatNumber(metrics.periodTypeDurationMinutes)} min`, label: 'de cardio', tone: 'secondary' },
-        { icon: 'directions_run', value: `${this.formatDistance(metrics.periodTypeDistanceKm)} km`, label: 'acumulados', tone: 'tertiary' },
-      ];
-    }
-
-    if (this.selectedType === 'core') {
-      return [
-        { icon: 'self_improvement', value: `${this.formatNumber(metrics.periodTypeReps)} reps`, label: 'totales', tone: 'secondary' },
-        { icon: 'hourglass_bottom', value: `${this.formatNumber(metrics.periodTypeDurationMinutes)} min`, label: 'acumulados', tone: 'tertiary' },
-      ];
-    }
-
     return [
-      { icon: 'category', value: `${this.formatNumber(metrics.periodTypeSetCount)}`, label: 'series', tone: 'secondary' },
+      { icon: 'fitness_center', value: `${this.formatNumber(metrics.periodStrengthVolumeKg)} kg`, label: 'volumen fuerza', tone: 'secondary' },
+      { icon: 'repeat', value: `${this.formatNumber(metrics.periodTypeSetCount)}`, label: 'series', tone: 'tertiary' },
+      { icon: 'timer', value: `${this.formatNumber(metrics.periodTypeDurationMinutes)} min`, label: 'duración', tone: 'secondary' },
       { icon: 'event_available', value: `${this.formatNumber(metrics.periodTypeSessionsCount)}`, label: 'sesiones', tone: 'tertiary' },
     ];
+  }
+
+  private syncMuscleButtons(): void {
+    const muscleGroups = this.chartsAnalyticsService.muscleGroups(this.sessions);
+    this.muscleButtons = muscleGroups.map((muscleGroup) => ({ value: muscleGroup, label: muscleGroup }));
+
+    if (!muscleGroups.includes(this.selectedMuscleGroup)) {
+      this.selectedMuscleGroup = muscleGroups[0] ?? '';
+    }
   }
 
   private buildRecordMessage(periodSessions: WorkoutSession[]): string {

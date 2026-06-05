@@ -312,6 +312,8 @@ final class WorkoutSessionControllerTest extends TestCase
 
         $run = new Exercise('Run', ExerciseType::Cardio);
         $squat = new Exercise('Squat', ExerciseType::Strength);
+        $run->setMuscleGroups(['Pierna']);
+        $squat->setMuscleGroups(['Pierna', 'Glúteo']);
         $this->setId($run, 1);
         $this->setId($squat, 2);
 
@@ -368,6 +370,7 @@ final class WorkoutSessionControllerTest extends TestCase
                         'exerciseName' => 'Run',
                         'type' => 'cardio',
                         'typeLabel' => 'Cardio',
+                        'muscleGroups' => ['Pierna'],
                         'notes' => null,
                         'sets' => [[
                             'setNumber' => 1,
@@ -388,6 +391,7 @@ final class WorkoutSessionControllerTest extends TestCase
                         'exerciseName' => 'Squat',
                         'type' => 'strength',
                         'typeLabel' => 'Fuerza',
+                        'muscleGroups' => ['Pierna', 'Glúteo'],
                         'notes' => 'Heavy sets',
                         'sets' => [
                             [

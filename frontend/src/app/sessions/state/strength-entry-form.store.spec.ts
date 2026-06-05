@@ -23,6 +23,7 @@ function createEntry(overrides: Partial<WorkoutEntry> = {}): WorkoutEntry {
     exerciseName: 'Press banca',
     type: 'strength',
     typeLabel: 'Fuerza',
+    muscleGroups: ['Pecho'],
     notes: 'Top set',
     sets: [
       { setNumber: 1, weightKg: 60, reps: 8, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: 'Warmup' },

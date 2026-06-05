@@ -29,6 +29,7 @@ describe('ChartsPage', () => {
           exerciseName: 'Cinta',
           type: 'cardio',
           typeLabel: 'Cardio',
+          muscleGroups: ['Pierna'],
           notes: null,
           sets: [
             {
@@ -68,6 +69,7 @@ describe('ChartsPage', () => {
           exerciseName: 'Remo',
           type: 'cardio',
           typeLabel: 'Cardio',
+          muscleGroups: ['Pierna'],
           notes: null,
           sets: [
             {
@@ -128,12 +130,12 @@ describe('ChartsPage', () => {
     const { fixture, component } = setup();
 
     fixture.detectChanges();
-    component.selectType('cardio');
+    component.selectMuscleGroup('Pierna');
 
     expect(component.weeklySessionCountValue).toBe(2);
     expect(component.periodSessionsCountValue).toBe(2);
-    expect(component.selectedTypeTotalLabelValue).toBe('15 min');
-    expect(component.selectedTypeStatCardsValue[1].value).toBe('4,0 km');
+    expect(component.selectedTypeTotalLabelValue).toBe('2 series');
+    expect(component.selectedTypeStatCardsValue[2].value).toBe('15 min');
   });
 
   it('returns chart paths with loaded data', () => {
@@ -165,9 +167,65 @@ describe('ChartsPage', () => {
     fixture.detectChanges();
 
     component.selectPeriod('week');
-    component.selectType('cardio');
+    component.selectMuscleGroup('Pierna');
 
-    expect(component.typeTrendPercentValue).toBe(167);
+    expect(component.typeTrendPercentValue).toBe(0);
     expect(component.recordMessageValue).toContain('Nuevo pico');
+  });
+
+  it('selects available muscle groups from loaded sessions', () => {
+    const extendedSessions: WorkoutSession[] = [
+      ...sessions,
+      {
+        ...sessions[0],
+        id: 3,
+        entries: [{ ...sessions[0].entries[0], id: 13, exerciseName: 'Curl', muscleGroups: ['Bíceps'] }],
+      },
+    ];
+    const { fixture, component } = setup(of({ items: extendedSessions }));
+
+    fixture.detectChanges();
+
+    expect(component.muscleButtons).toEqual([
+      { value: 'Bíceps', label: 'Bíceps' },
+      { value: 'Pierna', label: 'Pierna' },
+    ]);
+
+    component.selectMuscleGroup('Bíceps');
+
+    expect(component.selectedTypeTitleValue).toBe('Trabajo de Bíceps');
+    expect(component.selectedTypeTotalLabelValue).toBe('1 series');
+  });
+
+  it('filters session chart by month and year', () => {
+    const extendedSessions: WorkoutSession[] = [
+      ...sessions,
+      { ...sessions[0], id: 3, sessionDate: '2026-05-10', displayName: 'Mayo anterior' },
+      { ...sessions[0], id: 4, sessionDate: '2026-01-15', displayName: 'Enero' },
+      { ...sessions[0], id: 5, sessionDate: '2025-12-31', displayName: 'Año anterior' },
+    ];
+    const { fixture, component } = setup(of({ items: extendedSessions }));
+
+    fixture.detectChanges();
+
+    component.selectPeriod('month');
+
+    expect(component.weeklySessionCountValue).toBe(3);
+    expect(component.periodSessionChartTitleValue).toBe('Sesiones este mes');
+    expect(component.periodSessionCountLabelValue).toBe('3 sesiones este mes');
+    expect(component.dayMetricsValue.length).toBe(27);
+
+    component.selectPeriod('year');
+
+    expect(component.weeklySessionCountValue).toBe(4);
+    expect(component.periodSessionChartTitleValue).toBe('Sesiones este año');
+    expect(component.periodSessionCountLabelValue).toBe('4 sesiones este año');
+    expect(component.dayMetricsValue).toEqual([
+      { label: 'Ene', count: 1 },
+      { label: 'Feb', count: 0 },
+      { label: 'Mar', count: 0 },
+      { label: 'Abr', count: 0 },
+      { label: 'May', count: 3 },
+    ]);
   });
 });

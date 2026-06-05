@@ -22,6 +22,7 @@ export interface WorkoutEntry {
   exerciseName: string;
   type: ExerciseType;
   typeLabel: string;
+  muscleGroups: string[];
   notes: string | null;
   sets: WorkoutSet[];
 }

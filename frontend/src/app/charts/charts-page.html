@@ -23,11 +23,11 @@
     </section>
 
     <section class="no-scrollbar -mx-margin-mobile flex gap-xs overflow-x-auto px-margin-mobile pb-2 md:mx-0 md:px-0">
-      @for (type of typeButtons; track type.value) {
+      @for (muscle of muscleButtons; track muscle.value) {
       <button class="whitespace-nowrap rounded-full px-5 py-2 font-label-md text-label-md transition-colors"
-        [ngClass]="selectedType === type.value ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'"
-        (click)="selectType(type.value)" type="button">
-        {{ type.label }}
+        [ngClass]="selectedMuscleGroup === muscle.value ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'"
+        (click)="selectMuscleGroup(muscle.value)" type="button">
+        {{ muscle.label }}
       </button>
       }
     </section>
@@ -48,8 +48,8 @@
     <article class="rounded-2xl bg-surface-container-lowest p-md shadow-[0_8px_30px_rgba(59,130,246,0.04)]">
       <div class="mb-md flex items-start justify-between">
         <div>
-          <h2 class="font-headline-md text-headline-md text-on-surface">Sesiones por semana</h2>
-          <p class="font-label-md text-label-md text-primary">{{ weeklySessionCountValue }} sesiones esta semana</p>
+          <h2 class="font-headline-md text-headline-md text-on-surface">{{ periodSessionChartTitleValue }}</h2>
+          <p class="font-label-md text-label-md text-primary">{{ periodSessionCountLabelValue }}</p>
         </div>
         <span class="material-symbols-outlined text-primary">event_repeat</span>
       </div>

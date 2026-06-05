@@ -28,6 +28,7 @@ describe('SessionDetailStore', () => {
       exerciseName: 'Press',
       type: 'strength',
       typeLabel: 'Fuerza',
+      muscleGroups: ['Pecho'],
       notes: null,
       sets: [],
     };
