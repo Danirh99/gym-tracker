@@ -1,4 +1,4 @@
-import { Exercise } from '../../exercises/exercise.model';
+import { Exercise, ExerciseProgressSet } from '../../exercises/exercise.model';
 import { WorkoutEntry } from '../session.model';
 import { StrengthEntryFormStore } from './strength-entry-form.store';
 
@@ -65,5 +65,43 @@ describe('StrengthEntryFormStore hydration', () => {
     const store = new StrengthEntryFormStore();
     store.initFromEntry(createEntry({ notes: '   ' }), createExercise());
     expect(store.payloadNotes()).toBeNull();
+  });
+
+  it('hydrates sets from last session progress data', () => {
+    const store = new StrengthEntryFormStore();
+    const progressSets: ExerciseProgressSet[] = [
+      { setNumber: 1, weightKg: 60, reps: 10, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null },
+      { setNumber: 2, weightKg: 65, reps: 8, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null },
+      { setNumber: 3, weightKg: 70, reps: 6, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null },
+    ];
+
+    store.initFromLastSession(progressSets);
+
+    expect(store.sets()).toEqual([
+      { setNumber: 1, weightKg: '60', reps: '10' },
+      { setNumber: 2, weightKg: '65', reps: '8' },
+      { setNumber: 3, weightKg: '70', reps: '6' },
+    ]);
+  });
+
+  it('does not modify sets when progress is empty', () => {
+    const store = new StrengthEntryFormStore();
+    const original = store.sets();
+
+    store.initFromLastSession([]);
+
+    expect(store.sets()).toBe(original);
+  });
+
+  it('builds a payload that roundtrips progress values back to numbers', () => {
+    const store = new StrengthEntryFormStore();
+    store.initFromLastSession([
+      { setNumber: 1, weightKg: 40, reps: 12, durationSeconds: null, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null },
+    ]);
+
+    const payload = store.buildSetsPayload();
+
+    expect(payload).toHaveLength(1);
+    expect(payload[0]).toMatchObject({ setNumber: 1, weightKg: 40, reps: 12 });
   });
 });

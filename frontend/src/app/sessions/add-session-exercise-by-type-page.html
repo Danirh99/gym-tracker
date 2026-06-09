@@ -39,6 +39,35 @@
             [(ngModel)]="searchTerm" placeholder="Buscar ejercicio..." type="search" />
         </div>
 
+        @if (availableMuscleGroups.length > 0) {
+          <div class="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none" role="group" aria-label="Filtrar por músculo">
+            <button
+              class="shrink-0 rounded-full px-3 py-1.5 font-label-sm text-label-sm transition-all active:scale-95"
+              [class.bg-primary-container]="selectedMuscleGroup === null"
+              [class.text-on-primary-container]="selectedMuscleGroup === null"
+              [class.bg-surface-container-high]="selectedMuscleGroup !== null"
+              [class.text-on-surface-variant]="selectedMuscleGroup !== null"
+              (click)="selectedMuscleGroup = null"
+              type="button"
+            >
+              Todos
+            </button>
+            @for (group of availableMuscleGroups; track group) {
+              <button
+                class="shrink-0 rounded-full px-3 py-1.5 font-label-sm text-label-sm transition-all active:scale-95"
+                [class.bg-primary-container]="selectedMuscleGroup === group"
+                [class.text-on-primary-container]="selectedMuscleGroup === group"
+                [class.bg-surface-container-high]="selectedMuscleGroup !== group"
+                [class.text-on-surface-variant]="selectedMuscleGroup !== group"
+                (click)="selectedMuscleGroup = group"
+                type="button"
+              >
+                {{ muscleGroupLabel(group) }}
+              </button>
+            }
+          </div>
+        }
+
         <app-exercise-selector [exercises]="visibleExercises()" [selectedExerciseId]="selectedExerciseId"
           [emptyMessage]="'No hay ejercicios de este tipo que coincidan con la búsqueda.'" [compactMeta]="true"
           [scrollable]="true" variant="compact" (exerciseSelected)="selectExercise($event)" />

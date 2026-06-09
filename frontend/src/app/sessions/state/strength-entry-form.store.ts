@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { parseOptionalInt, parseOptionalNumber } from '../../core/utils/number.utils';
 import { normalizeOptionalString, normalizeSearchText } from '../../core/utils/string.utils';
-import { Exercise } from '../../exercises/exercise.model';
+import { Exercise, ExerciseProgressSet } from '../../exercises/exercise.model';
 import { CreateWorkoutSetPayload, WorkoutEntry } from '../session.model';
 import { strengthSetToRow } from '../sets-mapping';
 import { StrengthSetRow } from '../ui/strength-sets-table.component';
@@ -10,6 +10,9 @@ import { StrengthSetRow } from '../ui/strength-sets-table.component';
 export class StrengthEntryFormStore {
   /** Texto libre para filtrar ejercicios de fuerza. */
   readonly searchTerm = signal('');
+
+  /** Grupo muscular seleccionado para filtrar ejercicios. */
+  readonly selectedMuscleGroup = signal<string | null>(null);
 
   /** Notas opcionales para la entrada que se creara. */
   readonly notes = signal('');
@@ -41,6 +44,21 @@ export class StrengthEntryFormStore {
     this.sets.set(entry.sets.map((set, index) => strengthSetToRow(set, index)));
   }
 
+  initFromLastSession(sets: ExerciseProgressSet[]): void {
+    // Precarga las filas con los datos de la ultima sesion del ejercicio seleccionado.
+    if (sets.length === 0) {
+      return;
+    }
+
+    this.sets.set(
+      sets.map((set) => ({
+        setNumber: set.setNumber,
+        weightKg: set.weightKg === null ? '' : String(set.weightKg),
+        reps: set.reps === null ? '' : String(set.reps),
+      })),
+    );
+  }
+
   addSet(): void {
     // Agrega una fila vacia al final de la tabla de fuerza.
     const current = this.sets();
@@ -53,16 +71,24 @@ export class StrengthEntryFormStore {
   }
 
   visibleExercises(exercises: Exercise[]): Exercise[] {
-    // Filtra ejercicios segun el texto de busqueda actual.
     const normalizedSearch = normalizeSearchText(this.searchTerm());
+    const selectedMuscle = this.selectedMuscleGroup();
 
     return exercises.filter((exercise) => {
-      if (normalizedSearch === '') {
-        return true;
+      if (normalizedSearch !== '') {
+        const searchable = normalizeSearchText([exercise.name, exercise.typeLabel, ...exercise.muscleGroups].join(' '));
+        if (!searchable.includes(normalizedSearch)) {
+          return false;
+        }
       }
 
-      const searchable = normalizeSearchText([exercise.name, exercise.typeLabel, ...exercise.muscleGroups].join(' '));
-      return searchable.includes(normalizedSearch);
+      if (selectedMuscle !== null) {
+        if (!exercise.muscleGroups.includes(selectedMuscle)) {
+          return false;
+        }
+      }
+
+      return true;
     });
   }
 

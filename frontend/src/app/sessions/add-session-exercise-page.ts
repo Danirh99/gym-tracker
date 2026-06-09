@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Exercise } from '../exercises/exercise.model';
 import { ExercisesFacade } from '../exercises/state/exercises.facade';
+import { muscleGroupLabel } from '../exercises/muscle-group.utils';
 import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { StrengthEntryFormStore } from './state/strength-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
@@ -65,6 +66,20 @@ export class AddSessionExercisePage implements OnInit {
   set searchTerm(value: string) {
     this.formStore.searchTerm.set(value);
   }
+
+  get selectedMuscleGroup(): string | null {
+    return this.formStore.selectedMuscleGroup();
+  }
+
+  set selectedMuscleGroup(value: string | null) {
+    this.formStore.selectedMuscleGroup.set(value);
+  }
+
+  get availableMuscleGroups(): string[] {
+    return [...new Set(this.exercises.flatMap((e) => e.muscleGroups))].sort();
+  }
+
+  readonly muscleGroupLabel = muscleGroupLabel;
 
   get notes(): string {
     return this.formStore.notes();
@@ -133,6 +148,20 @@ export class AddSessionExercisePage implements OnInit {
   selectExercise(exercise: Exercise): void {
     // Asigna el ejercicio activo del formulario.
     this.formStore.selectExercise(exercise);
+
+    // Precarga las series de la ultima sesion para este ejercicio.
+    this.exercisesFacade
+      .progress(exercise.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const lastEntry = response.items[0];
+          if (lastEntry?.sets) {
+            this.formStore.initFromLastSession(lastEntry.sets);
+            this.changeDetectorRef.markForCheck();
+          }
+        },
+      });
   }
 
   addSet(): void {

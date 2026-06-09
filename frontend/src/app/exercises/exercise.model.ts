@@ -53,6 +53,10 @@ export interface ExerciseProgressSet {
   durationSeconds: number | null;
   distanceMeters: number | null;
   speedKmh: number | null;
+  incline: number | null;
+  resistanceLevel: number | null;
+  calories: number | null;
+  notes: string | null;
 }
 
 export interface ExerciseProgressEntry {

@@ -1,5 +1,5 @@
 import { TypedEntryFormStore } from './typed-entry-form.store';
-import { Exercise } from '../../exercises/exercise.model';
+import { Exercise, ExerciseProgressSet } from '../../exercises/exercise.model';
 import { WorkoutEntry } from '../session.model';
 
 describe('TypedEntryFormStore', () => {
@@ -83,5 +83,45 @@ describe('TypedEntryFormStore', () => {
     expect(store.coreOtherSets()).toEqual([
       { setNumber: 1, reps: '12', durationSeconds: '45', notes: 'Stable' },
     ]);
+  });
+
+  it('hydrates cardio sets from last session progress data', () => {
+    const store = new TypedEntryFormStore();
+    store.initType('cardio');
+    const progressSets: ExerciseProgressSet[] = [
+      { setNumber: 1, weightKg: null, reps: null, durationSeconds: 1500, distanceMeters: 2800, speedKmh: 6.7, incline: 3, resistanceLevel: 5, calories: 120, notes: null },
+    ];
+
+    store.initFromLastSession(progressSets);
+
+    expect(store.cardioSets()).toEqual([
+      { setNumber: 1, durationMinutes: '25', distanceKm: '2.8', speedKmh: '6.7', incline: '3', resistanceLevel: '5', calories: '120' },
+    ]);
+  });
+
+  it('hydrates core/other sets from last session progress data', () => {
+    const store = new TypedEntryFormStore();
+    store.initType('core');
+    const progressSets: ExerciseProgressSet[] = [
+      { setNumber: 1, weightKg: null, reps: 15, durationSeconds: 60, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: 'Stable' },
+      { setNumber: 2, weightKg: null, reps: 12, durationSeconds: 45, distanceMeters: null, speedKmh: null, incline: null, resistanceLevel: null, calories: null, notes: null },
+    ];
+
+    store.initFromLastSession(progressSets);
+
+    expect(store.coreOtherSets()).toEqual([
+      { setNumber: 1, reps: '15', durationSeconds: '60', notes: 'Stable' },
+      { setNumber: 2, reps: '12', durationSeconds: '45', notes: '' },
+    ]);
+  });
+
+  it('does not modify sets when progress is empty', () => {
+    const store = new TypedEntryFormStore();
+    store.initType('cardio');
+    const original = store.cardioSets();
+
+    store.initFromLastSession([]);
+
+    expect(store.cardioSets()).toBe(original);
   });
 });

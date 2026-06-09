@@ -546,7 +546,7 @@ final class ExerciseController extends AbstractController
     }
 
     /**
-     * @return array{sessionId:int|null,sessionDate:string,entryId:int|null,topSet:string|null,topSetWeightKg:float|null,topSetReps:int|null,volumeKg:float,durationSeconds:int,setsCount:int,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null}>}
+     * @return array{sessionId:int|null,sessionDate:string,entryId:int|null,topSet:string|null,topSetWeightKg:float|null,topSetReps:int|null,volumeKg:float,durationSeconds:int,setsCount:int,sets:list<array{setNumber:int,weightKg:float|null,reps:int|null,durationSeconds:int|null,distanceMeters:float|null,speedKmh:float|null,incline:float|null,resistanceLevel:int|null,calories:int|null,notes:string|null}>}
      */
     private function serializeProgressEntry(WorkoutEntry $entry): array
     {
@@ -585,6 +585,10 @@ final class ExerciseController extends AbstractController
                     'durationSeconds' => $set->getDurationSeconds(),
                     'distanceMeters' => $set->getDistanceMeters(),
                     'speedKmh' => $set->getSpeedKmh(),
+                    'incline' => $set->getIncline(),
+                    'resistanceLevel' => $set->getResistanceLevel(),
+                    'calories' => $set->getCalories(),
+                    'notes' => $set->getNotes(),
                 ],
                 $sets,
             ),

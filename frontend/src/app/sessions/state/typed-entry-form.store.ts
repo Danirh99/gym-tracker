@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { parseOptionalInt, parseOptionalNumber } from '../../core/utils/number.utils';
 import { normalizeOptionalString, normalizeSearchText } from '../../core/utils/string.utils';
-import { Exercise } from '../../exercises/exercise.model';
+import { Exercise, ExerciseProgressSet } from '../../exercises/exercise.model';
 import { CreateWorkoutSetPayload, WorkoutEntry } from '../session.model';
 import { cardioSetToRow, coreOtherSetToRow } from '../sets-mapping';
 import { CardioSetRow } from '../ui/cardio-sets-table.component';
@@ -16,6 +16,9 @@ export class TypedEntryFormStore {
 
   /** Texto libre para filtrar ejercicios en lista. */
   readonly searchTerm = signal('');
+
+  /** Grupo muscular seleccionado para filtrar ejercicios. */
+  readonly selectedMuscleGroup = signal<string | null>(null);
 
   /** Notas generales de la entrada agregada a la sesion. */
   readonly notes = signal('');
@@ -63,6 +66,37 @@ export class TypedEntryFormStore {
     this.coreOtherSets.set(entry.sets.map((set, index) => coreOtherSetToRow(set, index)));
   }
 
+  initFromLastSession(sets: ExerciseProgressSet[]): void {
+    // Precarga las filas con los datos de la ultima sesion del ejercicio seleccionado.
+    if (sets.length === 0) {
+      return;
+    }
+
+    if (this.type() === 'cardio') {
+      this.cardioSets.set(
+        sets.map((set) => ({
+          setNumber: set.setNumber,
+          durationMinutes: set.durationSeconds === null ? '' : String(Math.round(set.durationSeconds / 60)),
+          distanceKm: set.distanceMeters === null ? '' : String(set.distanceMeters / 1000),
+          speedKmh: set.speedKmh === null ? '' : String(set.speedKmh),
+          incline: set.incline === null ? '' : String(set.incline),
+          resistanceLevel: set.resistanceLevel === null ? '' : String(set.resistanceLevel),
+          calories: set.calories === null ? '' : String(set.calories),
+        })),
+      );
+      return;
+    }
+
+    this.coreOtherSets.set(
+      sets.map((set) => ({
+        setNumber: set.setNumber,
+        reps: set.reps === null ? '' : String(set.reps),
+        durationSeconds: set.durationSeconds === null ? '' : String(set.durationSeconds),
+        notes: set.notes ?? '',
+      })),
+    );
+  }
+
   addSet(): void {
     // Anade una fila nueva segun el tipo activo.
     if (this.type() === 'cardio') {
@@ -89,16 +123,24 @@ export class TypedEntryFormStore {
   }
 
   visibleExercises(exercises: Exercise[]): Exercise[] {
-    // Filtra por texto normalizado para tolerar tildes/mayusculas.
     const normalizedSearch = normalizeSearchText(this.searchTerm());
+    const selectedMuscle = this.selectedMuscleGroup();
 
     return exercises.filter((exercise) => {
-      if (normalizedSearch === '') {
-        return true;
+      if (normalizedSearch !== '') {
+        const searchable = normalizeSearchText([exercise.name, exercise.typeLabel, ...exercise.muscleGroups].join(' '));
+        if (!searchable.includes(normalizedSearch)) {
+          return false;
+        }
       }
 
-      const searchable = normalizeSearchText([exercise.name, exercise.typeLabel, ...exercise.muscleGroups].join(' '));
-      return searchable.includes(normalizedSearch);
+      if (selectedMuscle !== null) {
+        if (!exercise.muscleGroups.includes(selectedMuscle)) {
+          return false;
+        }
+      }
+
+      return true;
     });
   }
 

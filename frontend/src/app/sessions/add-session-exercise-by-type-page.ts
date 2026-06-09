@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Exercise, ExerciseType } from '../exercises/exercise.model';
-import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { ExercisesFacade } from '../exercises/state/exercises.facade';
+import { muscleGroupLabel } from '../exercises/muscle-group.utils';
+import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { TypedEntryFormStore, SupportedType } from './state/typed-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
@@ -73,6 +74,20 @@ export class AddSessionExerciseByTypePage implements OnInit {
   set searchTerm(value: string) {
     this.formStore.searchTerm.set(value);
   }
+
+  get selectedMuscleGroup(): string | null {
+    return this.formStore.selectedMuscleGroup();
+  }
+
+  set selectedMuscleGroup(value: string | null) {
+    this.formStore.selectedMuscleGroup.set(value);
+  }
+
+  get availableMuscleGroups(): string[] {
+    return [...new Set(this.exercises.flatMap((e) => e.muscleGroups))].sort();
+  }
+
+  readonly muscleGroupLabel = muscleGroupLabel;
 
   get notes(): string {
     return this.formStore.notes();
@@ -147,6 +162,20 @@ export class AddSessionExerciseByTypePage implements OnInit {
   selectExercise(exercise: Exercise): void {
     // Actualiza el ejercicio seleccionado en el store.
     this.formStore.selectExercise(exercise);
+
+    // Precarga las series de la ultima sesion para este ejercicio.
+    this.exercisesFacade
+      .progress(exercise.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const lastEntry = response.items[0];
+          if (lastEntry?.sets) {
+            this.formStore.initFromLastSession(lastEntry.sets);
+            this.changeDetectorRef.markForCheck();
+          }
+        },
+      });
   }
 
   addSet(): void {
