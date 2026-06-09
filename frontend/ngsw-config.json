@@ -12,10 +12,21 @@
     },
     {
       "name": "assets",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": ["/**", "!/**/*.html"]
+      }
+    },
+    {
+      "name": "google-fonts",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "urls": [
+          "https://fonts.googleapis.com/**",
+          "https://fonts.gstatic.com/**"
+        ]
       }
     }
   ],
@@ -24,20 +35,18 @@
       "name": "api-exercises",
       "urls": ["/api/exercises", "/api/exercises/**"],
       "cacheConfig": {
-        "strategy": "freshness",
+        "strategy": "performance",
         "maxSize": 100,
-        "maxAge": "1d",
-        "timeout": "1s"
+        "maxAge": "7d"
       }
     },
     {
       "name": "api-workout-sessions",
       "urls": ["/api/workout-sessions", "/api/workout-sessions/**", "/api/workout-sessions?**"],
       "cacheConfig": {
-        "strategy": "freshness",
+        "strategy": "performance",
         "maxSize": 200,
-        "maxAge": "1d",
-        "timeout": "1s"
+        "maxAge": "1d"
       }
     }
   ]
