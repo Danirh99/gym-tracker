@@ -37,6 +37,15 @@ jobs:
   backend:
     name: Backend (phpunit)
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+      APP_DEBUG: 1
+      APP_SECRET: test
+      DATABASE_URL: sqlite:///%kernel.project_dir%/var/test.db
+      DEFAULT_URI: http://localhost
+      MAILER_DSN: null://null
+      MESSENGER_TRANSPORT_DSN: sync://
+      GYM_TRACKER_ASSISTANT_TOKEN: test-token
     defaults:
       run:
         working-directory: backend
