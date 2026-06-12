@@ -58,9 +58,11 @@ docker compose exec backend php bin/console doctrine:migrations:migrate
 ## Servicios locales
 
 - Frontend: `http://localhost:4200`
-- Backend API: `http://localhost:8001`
+- Backend API desde el host: `http://localhost:8001`
 - Adminer: `http://localhost:8080`
 - PostgreSQL: `localhost:5432`
+
+El backend escucha en el puerto `8000` dentro del contenedor y Docker lo publica como `8001` en el host (`8001:8000`). Otros contenedores en la misma red Docker pueden usar `http://backend:8000`.
 
 Credenciales de base de datos:
 
@@ -108,6 +110,68 @@ docker compose down
 - `GET /api/workout-sessions/{id}`
 - `POST /api/workout-sessions/{id}/entries`
 - `DELETE /api/workout-sessions/{id}/entries/{entryId}`
+
+## API para n8n/Ollama
+
+Symfony expone una capa independiente para integraciones de IA bajo `/api/assistant/tools/*`. Esta capa esta pensada para n8n, Telegram y un futuro MCP; devuelve un campo `message` listo para responder por Telegram y no permite borrar ni editar registros.
+
+Configura un token en `backend/.env`:
+
+```env
+GYM_TRACKER_ASSISTANT_TOKEN=pon-un-token-largo-random
+```
+
+Despues levanta Docker con normalidad:
+
+```bash
+docker compose up --build
+```
+
+Desde n8n usa un nodo `HTTP Request`. La URL depende de donde se ejecute n8n:
+
+- Si n8n corre en el host o fuera de la red Docker del proyecto: `http://HOST_DEL_SERVIDOR:8001`.
+- Si n8n corre en la misma red Docker Compose que este proyecto: `http://backend:8000`.
+
+Ejemplo usando el puerto publicado en el host:
+
+```txt
+Method: POST
+URL: http://HOST_DEL_SERVIDOR:8001/api/assistant/tools/list-exercises
+Headers:
+  X-Gym-Tracker-Assistant-Token: pon-un-token-largo-random
+  Content-Type: application/json
+Body: {}
+```
+
+Tambien se acepta `Authorization: Bearer <token>`, pero `X-Gym-Tracker-Assistant-Token` evita problemas con servidores o proxies que no reenvian el header `Authorization`.
+
+Endpoints disponibles:
+
+- `POST /api/assistant/tools/list-exercises`
+- `POST /api/assistant/tools/create-exercise`
+- `POST /api/assistant/tools/get-exercise-progress`
+- `POST /api/assistant/tools/list-recent-sessions`
+- `POST /api/assistant/tools/get-session`
+- `POST /api/assistant/tools/create-workout-session`
+- `POST /api/assistant/tools/add-strength-entry`
+- `POST /api/assistant/tools/add-cardio-entry`
+- `POST /api/assistant/tools/add-core-entry`
+- `POST /api/assistant/tools/add-other-entry`
+
+Ejemplo para registrar fuerza:
+
+```json
+{
+  "sessionId": 12,
+  "exerciseId": 3,
+  "sets": [
+    { "weightKg": 40, "reps": 12 },
+    { "weightKg": 45, "reps": 10 },
+    { "weightKg": 50, "reps": 8 }
+  ],
+  "notes": null
+}
+```
 
 ## Testing
 

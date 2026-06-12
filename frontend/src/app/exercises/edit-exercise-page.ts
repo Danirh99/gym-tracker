@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { SwCacheService } from '../core/sw-cache.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { ExerciseType } from './exercise.model';
@@ -32,6 +33,7 @@ export class EditExercisePage implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly exercisesFacade: ExercisesFacade,
+    private readonly swCacheService: SwCacheService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     readonly formStore: ExerciseFormStore,
   ) {}
@@ -82,6 +84,7 @@ export class EditExercisePage implements OnInit {
       .update(this.exerciseId, payload)
       .subscribe({
         next: () => {
+          void this.swCacheService.invalidateUrl('/api/exercises');
           window.sessionStorage.setItem('exerciseToast', `Ejercicio actualizado: ${payload.name}`);
           void this.router.navigate(['/exercises']);
         },
@@ -122,6 +125,7 @@ export class EditExercisePage implements OnInit {
 
     this.exercisesFacade.delete(this.exerciseId).subscribe({
       next: () => {
+        void this.swCacheService.invalidateUrl('/api/exercises');
         const message = exerciseName === '' ? 'Ejercicio eliminado' : `Ejercicio eliminado: ${exerciseName}`;
         window.sessionStorage.setItem('exerciseToast', message);
         void this.router.navigate(['/exercises']);

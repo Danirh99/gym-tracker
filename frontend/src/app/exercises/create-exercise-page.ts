@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { SwCacheService } from '../core/sw-cache.service';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { ExercisesFacade } from './state/exercises.facade';
 import { ExerciseFormStore } from './state/exercise-form.store';
@@ -20,6 +21,7 @@ export class CreateExercisePage {
 
   constructor(
     private readonly exercisesFacade: ExercisesFacade,
+    private readonly swCacheService: SwCacheService,
     readonly formStore: ExerciseFormStore,
     private readonly router: Router,
   ) {}
@@ -56,7 +58,7 @@ export class CreateExercisePage {
       .create(payload)
       .subscribe({
         next: () => {
-          // Publica feedback para la pantalla de listado tras redireccion.
+          void this.swCacheService.invalidateUrl('/api/exercises');
           window.sessionStorage.setItem('exerciseToast', `Ejercicio creado: ${payload.name}`);
           void this.router.navigate(['/exercises']);
         },

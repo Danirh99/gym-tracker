@@ -9,6 +9,7 @@ import { ExerciseType, WorkoutEntry, WorkoutSession, WorkoutSet } from './sessio
 import { ExerciseTypeModalComponent } from './exercise-type-modal.component';
 import { SessionDetailStore } from './state/session-detail.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
+import { SwCacheService } from '../core/sw-cache.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { UiToastStore } from '../shared/ui-feedback/ui-toast.store';
@@ -27,6 +28,7 @@ export class SessionDetailPage implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly workoutSessionsFacade: WorkoutSessionsFacade,
+    private readonly swCacheService: SwCacheService,
     readonly store: SessionDetailStore,
     readonly toastStore: UiToastStore,
   ) {}
@@ -210,7 +212,7 @@ export class SessionDetailPage implements OnInit {
 
     this.workoutSessionsFacade.removeEntry(sessionId, entryId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ item }) => {
-        // Captura nombre antes de limpiar estado para mensaje de confirmacion.
+        void this.swCacheService.invalidateUrl(`/api/workout-sessions/${sessionId}`);
         const removedExerciseName = this.entryPendingDeletion?.exerciseName?.trim() ?? '';
         this.store.finishDeleting(item);
         this.toastStore.show(removedExerciseName === '' ? 'Ejercicio eliminado de la sesión.' : `Ejercicio eliminado: ${removedExerciseName}`, 'success');

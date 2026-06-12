@@ -9,6 +9,7 @@ import { muscleGroupLabel } from '../exercises/muscle-group.utils';
 import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { StrengthEntryFormStore } from './state/strength-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
+import { SwCacheService } from '../core/sw-cache.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { ThemeToggleButtonComponent } from '../shared/theme-toggle-button.component';
 import { UiToastStore } from '../shared/ui-feedback/ui-toast.store';
@@ -43,6 +44,7 @@ export class AddSessionExercisePage implements OnInit {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly exercisesFacade: ExercisesFacade,
     private readonly workoutSessionsFacade: WorkoutSessionsFacade,
+    private readonly swCacheService: SwCacheService,
     readonly formStore: StrengthEntryFormStore,
     readonly toastStore: UiToastStore,
   ) {}
@@ -228,6 +230,7 @@ export class AddSessionExercisePage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          void this.swCacheService.invalidateUrl(`/api/workout-sessions/${this.sessionId}`);
           const exerciseName = this.exercises.find((exercise) => exercise.id === selectedExerciseId)?.name.trim() ?? '';
           const message = this.isEditMode
             ? (exerciseName === '' ? 'Ejercicio actualizado.' : `Ejercicio actualizado: ${exerciseName}`)

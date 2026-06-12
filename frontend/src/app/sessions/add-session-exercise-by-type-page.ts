@@ -9,6 +9,7 @@ import { muscleGroupLabel } from '../exercises/muscle-group.utils';
 import { AddSessionExercisePayload, WorkoutEntry } from './session.model';
 import { TypedEntryFormStore, SupportedType } from './state/typed-entry-form.store';
 import { WorkoutSessionsFacade } from './state/workout-sessions.facade';
+import { SwCacheService } from '../core/sw-cache.service';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { CardioSetRow, CardioSetsTableComponent } from './ui/cardio-sets-table.component';
 import { CoreOtherSetRow, CoreOtherSetsTableComponent } from './ui/core-other-sets-table.component';
@@ -51,6 +52,7 @@ export class AddSessionExerciseByTypePage implements OnInit {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly exercisesFacade: ExercisesFacade,
     private readonly workoutSessionsFacade: WorkoutSessionsFacade,
+    private readonly swCacheService: SwCacheService,
     readonly formStore: TypedEntryFormStore,
     readonly toastStore: UiToastStore,
   ) {}
@@ -252,6 +254,7 @@ export class AddSessionExerciseByTypePage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          void this.swCacheService.invalidateUrl(`/api/workout-sessions/${this.sessionId}`);
           const exerciseName = this.exercises.find((exercise) => exercise.id === selectedExerciseId)?.name.trim() ?? '';
           const message = this.isEditMode
             ? (exerciseName === '' ? 'Ejercicio actualizado.' : `Ejercicio actualizado: ${exerciseName}`)
