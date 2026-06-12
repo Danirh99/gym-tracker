@@ -37,15 +37,6 @@ jobs:
   backend:
     name: Backend (phpunit)
     runs-on: ubuntu-latest
-    env:
-      APP_ENV: test
-      APP_DEBUG: 1
-      APP_SECRET: test
-      DATABASE_URL: sqlite:///%kernel.project_dir%/var/test.db
-      DEFAULT_URI: http://localhost
-      MAILER_DSN: null://null
-      MESSENGER_TRANSPORT_DSN: sync://
-      GYM_TRACKER_ASSISTANT_TOKEN: test-token
     defaults:
       run:
         working-directory: backend
@@ -59,6 +50,18 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
+
+      - name: Create test env file
+        run: |
+          cp .env.test .env
+          {
+            printf '\nAPP_ENV=test\n'
+            printf 'APP_DEBUG=1\n'
+            printf 'DATABASE_URL="sqlite:///%s/var/test.db"\n' "$GITHUB_WORKSPACE/backend"
+            printf 'DEFAULT_URI=http://localhost\n'
+            printf 'MAILER_DSN=null://null\n'
+            printf 'MESSENGER_TRANSPORT_DSN=sync://\n'
+          } >> .env
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
