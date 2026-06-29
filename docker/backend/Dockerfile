@@ -70,27 +70,28 @@ COPY docker/backend/www.conf /usr/local/etc/php-fpm.d/zz-app.conf
 # App + vendor desde el builder
 COPY --from=vendor --chown=www-data:www-data /app /app
 
-# Composer CLI (solo lo necesitamos en el contenedor para que el command de dev
-# funcione; en prod no se ejecuta ningun composer install, asi que es solo coste de disco)
+# Composer CLI (util para el entrypoint de dev y para correr bin/console)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Symfony necesita escribir en var/
 RUN mkdir -p var/cache var/log \
     && chown -R www-data:www-data var
 
-# Pre-calentamos la cache de Symfony en prod.
-# APP_SECRET y DATABASE_URL son obligatorios para que el kernel compile la config.
-ENV APP_ENV=prod \
-    APP_SECRET=build-time-placeholder-not-used-at-runtime \
-    DATABASE_URL="postgresql://app:app@database:5432/app?serverVersion=16&charset=utf8"
+# Symfony's Dotenv exige que /app/.env exista para arrancar. Si el repo no lo
+# incluye (es lo normal en repos que despliegan a varios entornos), creamos
+# uno vacio. Las env vars reales vienen del orquestador y machacan cualquier
+# valor. Para warmup en runtime: `php bin/console cache:warmup --env=prod`.
+RUN [ -f /app/.env ] || touch /app/.env \
+    && chown www-data:www-data /app/.env
 
-RUN php bin/console cache:clear --no-warmup --env=prod \
-    && php bin/console cache:warmup --env=prod
+# NOTA: No hacemos cache:warmup aqui a proposito.
+# Las env vars reales (APP_SECRET, DATABASE_URL, etc.) las proporciona el
+# orquestador en runtime. Symfony genera/regenera la cache al primer request
+# o cuando se ejecuta `php bin/console cache:warmup` manualmente desde el deploy.
 
 EXPOSE 9000
 
-# healthcheck via cgi-fcgi (incluido en php image)
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1
+    CMD php -r 'exit(@fsockopen("127.0.0.1", 9000) ? 0 : 1);'
 
 CMD ["php-fpm"]

@@ -34,8 +34,10 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_DEBUG: ${APP_DEBUG:-0}
-      APP_SECRET: ${APP_SECRET:?APP_SECRET must be set in production}
+      APP_SECRET: ${APP_SECRET:?APP_SECRET must be set}
       DATABASE_URL: postgresql://app:app@database:5432/app?serverVersion=16&charset=utf8
+      # Si la app usa DEFAULT_URI, pasala aqui desde el entorno del orquestador
+      # DEFAULT_URI: ${DEFAULT_URI}
     depends_on:
       database:
         condition: service_healthy
