@@ -19,55 +19,28 @@ services:
         echo 'Angular app not found. Create it with: docker compose run --rm frontend npx @angular/cli new gym-tracker --directory . --routing --style scss --skip-git --package-manager npm --defaults' && sleep infinity;
       fi"
 
-  # Symfony + PHP-FPM. Ya no expone puerto al host: solo nginx lo ve por la red interna.
   backend:
     build:
       context: .
       dockerfile: docker/backend/Dockerfile
-    image: gym-tracker-backend:latest
     working_dir: /app
     volumes:
       - ./backend:/app
       - backend_vendor:/app/vendor
-    expose:
-      - "9000"
+    ports:
+      - "8001:8000"
     environment:
-      APP_ENV: ${APP_ENV:-prod}
-      APP_DEBUG: ${APP_DEBUG:-0}
-      APP_SECRET: ${APP_SECRET:?APP_SECRET must be set}
+      APP_ENV: dev
       DATABASE_URL: postgresql://app:app@database:5432/app?serverVersion=16&charset=utf8
-      # Si la app usa DEFAULT_URI, pasala aqui desde el entorno del orquestador
-      # DEFAULT_URI: ${DEFAULT_URI}
     depends_on:
       database:
         condition: service_healthy
-    # En dev (con bind mount), reaprovechamos el vendor baked-in de la imagen
-    # via el named volume, y re-instalamos con dev deps para tener bin/console, etc.
-    # En prod, monta la imagen tal cual sin bind mount y este command se ignora.
     command: >
-      sh -c "composer install --no-interaction --no-progress --optimize-autoloader && php-fpm"
-    healthcheck:
-      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  # Nginx como reverse proxy + servidor de estaticos. Es el unico que publica puerto.
-  nginx:
-    build:
-      context: .
-      dockerfile: docker/nginx/Dockerfile
-    image: gym-tracker-nginx:latest
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - "8001:8000"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8000/healthz"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      sh -c "if [ -f composer.json ]; then
+        composer install && php -S 0.0.0.0:8000 -t public public/index.php;
+      else
+        echo 'Symfony app not found. Create it with: docker compose run --rm backend composer create-project symfony/skeleton . && docker compose run --rm backend composer require symfony/webapp-pack' && sleep infinity;
+      fi"
 
   database:
     image: postgres:16-alpine

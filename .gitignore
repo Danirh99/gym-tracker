@@ -2,9 +2,5 @@
 frontend/node_modules/
 backend/vendor/
 backend/var/
-/.env
-/.env.local
+.env.local
 docker-compose.override.yml
-docker-compose.override.local.yml
-web/
-gym-tracker-video/
