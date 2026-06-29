@@ -4,7 +4,7 @@
 
 Gym Tracker usa una estetica **limpia, moderna, productiva y motivadora**, orientada a una PWA movil para registrar entrenamientos con rapidez.
 
-La sensacion debe estar entre:
+La sensacion debe estar entrea:
 
 ```txt
 fitness personal
